@@ -23,8 +23,15 @@ As a implementation agent, I want implementation discipline implemented, so that
 
 ## Acceptance criteria
 
-- [ ] For every required behavior, tests are written or updated before production changes are made.
-- [ ] Agents run tests and observe an expected failure before implementing behavior.
-- [ ] Agents implement the smallest production change needed, then re-run targeted tests.
-- [ ] Agents re-run full validation before packaging or release.
-- [ ] Ambiguities that block implementation cause the agent to stop and ask instead of inventing hidden requirements.
+<!-- Expanded from agentic-redesign.md to provide behavior-level coverage. -->
+
+- [ ] AC-00-001: Implementation must be test-first.
+- [ ] AC-00-002: For each required behavior:
+- [ ] AC-00-003: Write or update tests first.
+- [ ] AC-00-004: If this document is ambiguous in a way that prevents implementation, stop and ask.
+- [ ] AC-00-005: This document must be sufficient for an implementation agent to build Spec Guard without relying on undocumented behavior.
+- [ ] AC-00-006: Ordered requirement is supported/enforced: Write or update tests first.
+- [ ] AC-00-007: Ordered requirement is supported/enforced: Run tests and observe the expected failure.
+- [ ] AC-00-008: Ordered requirement is supported/enforced: Implement the smallest production change that satisfies the tests.
+- [ ] AC-00-009: Ordered requirement is supported/enforced: Re-run targeted tests.
+- [ ] AC-00-010: Ordered requirement is supported/enforced: Re-run full validation before packaging or release.

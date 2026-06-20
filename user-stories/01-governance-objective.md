@@ -25,9 +25,26 @@ As a project maintainer, I want governance objective and critical truth implemen
 
 ## Acceptance criteria
 
-- [ ] The system distinguishes proposals from accepted canonical intent.
-- [ ] Broad work is split into traceable bounded packets.
-- [ ] Implementation cannot start until approval, authorization, and pre-implementation validation are satisfied.
-- [ ] Docs, tests, and failure evidence precede implementation source changes where required.
-- [ ] Runtime evidence and final claims are evidence-backed.
-- [ ] Critical truth comes only from human decisions, deterministic observations, backend verification of required claims, or auditable artifacts.
+<!-- Expanded from agentic-redesign.md to provide behavior-level coverage. -->
+
+- [ ] AC-01-001: human intent is explicitly captured,
+- [ ] AC-01-002: implementation starts only after approval, authorization, and pre-implementation validation,
+- [ ] AC-01-003: required docs, tests, and failure evidence precede implementation source changes,
+- [ ] AC-01-004: source/mockup/design-derived ACs are visible with source evidence before approval,
+- [ ] AC-01-005: CLI, MCP, Pi, viewer, and generated agent-harness integrations expose the same governed workflow.
+- [ ] AC-01-006: Critical truth must come from:
+- [ ] AC-01-007: backend verification of required semantic frontend-agent claims,
+- [ ] AC-01-008: Frontend-agent claims alone are never critical truth.
+- [ ] AC-01-009: Enumerated item is supported/enforced: human intent is explicitly captured,
+- [ ] AC-01-010: Enumerated item is supported/enforced: frontend-agent proposals remain proposals until accepted through the proper gate,
+- [ ] AC-01-011: Enumerated item is supported/enforced: human-approved content is canonical intent,
+- [ ] AC-01-012: Enumerated item is supported/enforced: broad work is split into traceable bounded packets,
+- [ ] AC-01-013: Enumerated item is supported/enforced: implementation starts only after approval, authorization, and pre-implementation validation,
+- [ ] AC-01-014: Enumerated item is supported/enforced: required docs, tests, and failure evidence precede implementation source changes,
+- [ ] AC-01-015: Enumerated item is supported/enforced: source/mockup/design-derived ACs are visible with source evidence before approval,
+- [ ] AC-01-016: Enumerated item is supported/enforced: runtime evidence and final claims are evidence-backed,
+- [ ] AC-01-017: Enumerated item is supported/enforced: CLI, MCP, Pi, viewer, and generated agent-harness integrations expose the same governed workflow.
+- [ ] AC-01-018: Enumerated item is supported/enforced: explicit human decisions,
+- [ ] AC-01-019: Enumerated item is supported/enforced: deterministic observations,
+- [ ] AC-01-020: Enumerated item is supported/enforced: backend verification of required semantic frontend-agent claims,
+- [ ] AC-01-021: Enumerated item is supported/enforced: auditable artifacts.

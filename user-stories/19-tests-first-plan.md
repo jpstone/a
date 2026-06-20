@@ -22,9 +22,240 @@ As a test author, I want tests-first coverage plan implemented, so that the rede
 
 ## Acceptance criteria
 
-- [ ] Tests cover choice and authority semantics.
-- [ ] Tests cover review snapshots, approved fields, decisions, and invalidation.
-- [ ] Tests cover AC approval, packet approval, authorization, Plans, and batch behavior.
-- [ ] Tests cover runtime and packet change baselines.
-- [ ] Tests cover classification/docs and validation chains.
-- [ ] Tests cover backend verifier, pre-implementation, review, final claims, CLI/MCP/viewer, and migration.
+<!-- Expanded from agentic-redesign.md to provide behavior-level coverage. -->
+
+- [ ] AC-19-001: Tests must cover these behaviors before implementation.
+- [ ] AC-19-002: creates no HumanDecision.
+- [ ] AC-19-003: Numbered No records decline/block decisions with empty approved fields and no approved payload.
+- [ ] AC-19-004: Non-binary custom choices require numbered confirmation.
+- [ ] AC-19-005: Backend verifier cannot approve, reject, or judge human intent.
+- [ ] AC-19-006: Human decisions record approved fields.
+- [ ] AC-19-007: Standard actions derive approved fields by decision type.
+- [ ] AC-19-008: Supersession backlink updates are metadata-only
+- [ ] AC-19-009: Durable decision histories retain superseded Work Packet and Plan decisions.
+- [ ] AC-19-010: Unconfirmed custom choices and Discuss do not record final platform or architecture decisions.
+- [ ] AC-19-011: Registered decision types rooted in HumanDecision.approved_payload require canonical approved payloads on final selecting decisions.
+- [ ] AC-19-012: Authorization decisions store the canonical AuthorizationReviewSnapshotPayload as approved payload for later invalidation.
+- [ ] AC-19-013: do not include the Plan approval decision itself.
+- [ ] AC-19-014: Generic update actions reject protected approved-field changes or list deterministic approval invalidations.
+- [ ] AC-19-015: Batch proceed stores batch snapshot, pre-decision BatchProceedSelectionPayload, post-action BatchProceedResult, and per-child snapshot bindings.
+- [ ] AC-19-016: Batch proceed approved fields bind only to pre-decision selection fields and not post-action result fields.
+- [ ] AC-19-017: Batch proceed HumanDecision uses approved_payload_ref to reference BatchProceedRecord selection payload rather than requiring duplicated approved payload.
+- [ ] AC-19-018: Batch proceed HumanDecision stores review snapshot fields, parent batch snapshot fields, and source artifact refs from the persisted BatchReviewSnapshot.
+- [ ] AC-19-019: Batch proceed option 1 records a one-at-a-time BatchProceedRecord with per-proposed-child result rows containing null/false result fields.
+- [ ] AC-19-020: Persisting a batch snapshot is an audit-only mutation
+- [ ] AC-19-021: does not mutate governed state or increment governed Plan revision.
+- [ ] AC-19-022: Persisted snapshots and batch snapshots use audit revisions separate from governed artifact revisions.
+- [ ] AC-19-023: Non-batch persisted snapshots are created only through audit-only snapshot persistence, not normal review producers.
+- [ ] AC-19-024: Stale batch snapshot blocks batch mutation.
+- [ ] AC-19-025: Single Work Packet path requires AC approval before Work Packet approval.
+- [ ] AC-19-026: `work.ac.approve` rejects reviewed AC payloads that do not match the supplied snapshot hash.
+- [ ] AC-19-027: Source-derived ACs are displayed with source/evidence and approved through the AC gate.
+- [ ] AC-19-028: Source-derived ACs are excluded from Plan batch approval and batch authorization.
+- [ ] AC-19-029: Plan batch approval can approve only explicitly displayed eligible non-source-derived child ACs/packets.
+- [ ] AC-19-030: Source-derived children have nullable batch authorization hashes
+- [ ] AC-19-031: Plan proposal slice ids and proposed child ids reject values that cannot be used in batch child snapshot revisions.
+- [ ] AC-19-032: Batch snapshots store expected created Work Packet revision for every proposed child, independent of authorization eligibility.
+- [ ] AC-19-033: ProposedChildrenPayload contains the canonical ProposedWorkPacketPayload used for child snapshots and optional shorthand fields are validation mirrors only.
+- [ ] AC-19-034: BatchReviewSnapshot source artifact refs are derived from the approved Plan, proposed children payload refs, and AC SourceEvidence refs.
+- [ ] AC-19-035: Batch child correspondence enforces the same approved Plan slice constraints as one-at-a-time child creation.
+- [ ] AC-19-036: Proposed children explicitly map to approved Plan slices through plan_slice_id and created WorkPackets durably store plan_slice_id.
+- [ ] AC-19-037: WorkPacket and ProposedWorkPacketPayload include canonical title for Plan child correspondence.
+- [ ] AC-19-038: Source-derived AC evidence uses structured SourceArtifactRefs and source evidence hashes rather than free-form summary matching.
+- [ ] AC-19-039: SourceArtifact registration creates immutable, content-addressed revisions that SourceArtifactRefs can resolve.
+- [ ] AC-19-040: Batch AC/packet approvals require exact created-child approval-relevant payload and revision match against the ProposedWorkPacketPayload projection used for snapshots.
+- [ ] AC-19-041: Proposed child authorization snapshots use ProposedAuthorizationReviewSnapshotPayload with expected created revision semantics.
+- [ ] AC-19-042: Child-specific batch snapshot revisions use the exact batch-child revision format
+- [ ] AC-19-043: reject ambiguous proposed child ids.
+- [ ] AC-19-044: Batch proceed result records child snapshot hashes and revisions for approvals/authorizations actually recorded.
+- [ ] AC-19-045: Non-batch Plan children use sequential gates.
+- [ ] AC-19-046: Plan proposals do not create draft Plan artifacts
+- [ ] AC-19-047: Plan artifacts are created only by Plan approval.
+- [ ] AC-19-048: `plan.update` rejects changes to Plan-approved fields unless a registered Plan amendment flow exists.
+- [ ] AC-19-049: Runtime baseline acceptance requires human Yes and deterministic validation.
+- [ ] AC-19-050: Runtime baseline is not used as diff base.
+- [ ] AC-19-051: Packet change baseline is captured at authorization.
+- [ ] AC-19-052: VCS and manifest modes compute changed files.
+- [ ] AC-19-053: Dirty implementation source at authorization blocks unless resolved.
+- [ ] AC-19-054: Implementation source before failure-first blocks validation.
+- [ ] AC-19-055: Classification enum is enforced.
+- [ ] AC-19-056: `reusable_api`, `rest_api`, and `reusable_ui` always require docs policy `required`.
+- [ ] AC-19-057: Non-API packets with docs policy `required` follow docs before tests before failure evidence before implementation.
+- [ ] AC-19-058: Operational-document packets require docs/content policy `required`.
+- [ ] AC-19-059: Operational-document packets can mark tests/failure-first not applicable only when no product behavior changes.
+- [ ] AC-19-060: Documentation itself is never tested
+- [ ] AC-19-061: retained docs tests block review.
+- [ ] AC-19-062: Docs-updated claims are required and passed before review completion when docs are required, docs policy is `changed`, docs files changed, or docs policy changed.
+- [ ] AC-19-063: Docs policy `changed` requires docs-updated verification before review completion without a later semantic documented-behavior-changed judgment.
+- [ ] AC-19-064: Direct docs/content file changes without docs evidence register or expose missing docs-updated claims
+- [ ] AC-19-065: block review.
+- [ ] AC-19-066: Required verification matrix is enforced.
+- [ ] AC-19-067: Disabled/misconfigured verifier blocks required semantic checks.
+- [ ] AC-19-068: API/contract-surface chain enforces docs before tests before failure evidence before implementation.
+- [ ] AC-19-069: Non-API docs-required chain enforces docs before tests before failure evidence before implementation.
+- [ ] AC-19-070: Non-API docs-not-required chain enforces tests before failure evidence before implementation.
+- [ ] AC-19-071: Operational-document docs-only chain enforces docs/content validation and no product source changes.
+- [ ] AC-19-072: Failure evidence semantic verification is required when failure is used to prove missing approved behavior.
+- [ ] AC-19-073: Allowed globs apply to product-scope files and exempt Spec Guard artifacts/evidence from blocking.
+- [ ] AC-19-074: Tests must clean up files, database tables/rows, external resources, processes, and runtime state.
+- [ ] AC-19-075: Command-backed evidence references kernel-created CommandResult records and never trusts caller-supplied exit codes or command status.
+- [ ] AC-19-076: CommandResult records include execution context and durable storage references.
+- [ ] AC-19-077: do not use them to satisfy required evidence gates.
+- [ ] AC-19-078: Evidence actions reject CommandResults with incompatible purpose.
+- [ ] AC-19-079: Review requires traceability, cleanup verification, and required backend verification.
+- [ ] AC-19-080: Cleanup evidence action records checked resources and side-effect status.
+- [ ] AC-19-081: Not-applicable evidence action records tests/failure-first not-applicable reasons only with deterministic eligibility.
+- [ ] AC-19-082: Human confirmation, when collected, only acknowledges the eligible determination.
+- [ ] AC-19-083: Batch authorization captures PacketChangeBaseline per authorized child or leaves that child unauthorized with diagnostics.
+- [ ] AC-19-084: Final claims require support or explicit unverified labeling
+- [ ] AC-19-085: Every shared workflow action has CLI and MCP mapping unless bootstrap-only or local-runtime-only.
+- [ ] AC-19-086: Human-gated actions require selected number, raw response, decision prompt, and human confirmation.
+- [ ] AC-19-087: Review-bound approval actions require review snapshot hash, revision, and source artifact refs when using ephemeral snapshots.
+- [ ] AC-19-088: `work.plan_choice.answer` records the registered Plan-vs-single fixed decision.
+- [ ] AC-19-089: `plan.approve` rejects Plan proposal payloads that do not match the supplied snapshot hash.
+- [ ] AC-19-090: `command.run` creates deterministic CommandResult records used by command-backed evidence.
+- [ ] AC-19-091: `plan.batch_snapshot.create` requires proposed children payload
+- [ ] AC-19-092: records only an audit snapshot.
+- [ ] AC-19-093: `plan.child.create` creates one child only when tied to an approved Plan proposal/slice and matching child constraints, with proposed_child_id equal to plan_slice_id.
+- [ ] AC-19-094: Evidence actions register or reference stable claims for required backend verification.
+- [ ] AC-19-095: supersession is append-only.
+- [ ] AC-19-096: MCP calls shared core directly and never shells out to CLI.
+- [ ] AC-19-097: `npx spec-guard init` successful default output is plain text, includes generated file paths and next steps,
+- [ ] AC-19-098: `npx spec-guard init --json` returns the standard shared action result JSON.
+- [ ] AC-19-099: The generated Pi extension module is loadable by Pi's factory contract: importing/loading the generated file yields a default-exported factory function, invoking the factory with a mock or real `ExtensionAPI` registers expected `spec_guard_*` tools, and no tools-only or named-export-only extension is accepted.
+- [ ] AC-19-100: `serve.viewer` starts a real listening HTTP server on the requested host/port, returns a successful HTTP response for the dashboard,
+- [ ] AC-19-101: keeps the CLI process/server alive until explicitly terminated.
+- [ ] AC-19-102: Viewer uses Mantine components/theme or Mantine-backed project wrappers for dashboard/review layout, cards, badges, tables/lists, buttons/links, and action states.
+- [ ] AC-19-103: Viewer dashboard follows industry-standard dashboard layout patterns with an overview-first responsive metric-card grid, clear status hierarchy, and drill-down navigation.
+- [ ] AC-19-104: Viewer dashboard exposes full artifact metric cards for total artifacts, totals by artifact type, counts by type/status, workflow-stage counts, baseline, verifier, pending gates, blocked state, validation failures, runtime evidence, and final claim support.
+- [ ] AC-19-105: Cards requiring user action are visually distinct from passive informational cards using Mantine-supported non-color-only emphasis.
+- [ ] AC-19-106: Viewer dashboard and `config.check` derive their summary from persisted artifacts: a test must create a real artifact through a shared workflow action such as `work.intake`, then assert total artifact counts, artifact counts by type, lifecycle/workflow-stage counts, and pending-gate summary changes without using fake viewer data.
+- [ ] AC-19-107: Enumerated item is supported/enforced: Human-owned decisions route to human gates.
+- [ ] AC-19-108: Enumerated item is supported/enforced: Discuss mutates nothing and creates no HumanDecision.
+- [ ] AC-19-109: Enumerated item is supported/enforced: Numbered No records decline/block decisions with empty approved fields and no approved payload.
+- [ ] AC-19-110: Enumerated item is supported/enforced: Binary gates remain Yes/No/Discuss after discussion.
+- [ ] AC-19-111: Enumerated item is supported/enforced: Fixed binary decisions have exactly two outcomes plus Discuss.
+- [ ] AC-19-112: Enumerated item is supported/enforced: Non-binary custom choices require numbered confirmation.
+- [ ] AC-19-113: Enumerated item is supported/enforced: Backend verifier cannot approve, reject, or judge human intent.
+- [ ] AC-19-114: Enumerated item is supported/enforced: Every review-bound gate has a non-mutating snapshot producer.
+- [ ] AC-19-115: Enumerated item is supported/enforced: Review snapshot hash is deterministic.
+- [ ] AC-19-116: Enumerated item is supported/enforced: Human decisions record approved fields.
+- [ ] AC-19-117: Enumerated item is supported/enforced: Standard actions derive approved fields by decision type.
+- [ ] AC-19-118: Enumerated item is supported/enforced: Supersession backlink updates are metadata-only and do not alter decision substance.
+- [ ] AC-19-119: Enumerated item is supported/enforced: Durable decision histories retain superseded Work Packet and Plan decisions.
+- [ ] AC-19-120: Enumerated item is supported/enforced: Plan-vs-single, platform, and architecture choices have registered decision types and approved payloads for final selections.
+- [ ] AC-19-121: Enumerated item is supported/enforced: Unconfirmed custom choices and Discuss do not record final platform or architecture decisions.
+- [ ] AC-19-122: Enumerated item is supported/enforced: Registered decision types rooted in HumanDecision.approved_payload require canonical approved payloads on final selecting decisions.
+- [ ] AC-19-123: Enumerated item is supported/enforced: Authorization decisions store the canonical AuthorizationReviewSnapshotPayload as approved payload for later invalidation.
+- [ ] AC-19-124: Enumerated item is supported/enforced: Plan approval approved fields are rooted in PlanProposalPayload and do not include the Plan approval decision itself.
+- [ ] AC-19-125: Enumerated item is supported/enforced: Changing an approved field invalidates dependent approvals.
+- [ ] AC-19-126: Enumerated item is supported/enforced: Generic update actions reject protected approved-field changes or list deterministic approval invalidations.
+- [ ] AC-19-127: Enumerated item is supported/enforced: Batch proceed stores batch snapshot, pre-decision BatchProceedSelectionPayload, post-action BatchProceedResult, and per-child snapshot bindings.
+- [ ] AC-19-128: Enumerated item is supported/enforced: Batch proceed approved fields bind only to pre-decision selection fields and not post-action result fields.
+- [ ] AC-19-129: Enumerated item is supported/enforced: Batch proceed HumanDecision uses approved_payload_ref to reference BatchProceedRecord selection payload rather than requiring duplicated approved payload.
+- [ ] AC-19-130: Enumerated item is supported/enforced: Batch proceed HumanDecision stores review snapshot fields, parent batch snapshot fields, and source artifact refs from the persisted BatchReviewSnapshot.
+- [ ] AC-19-131: Enumerated item is supported/enforced: Batch proceed option 1 records a one-at-a-time BatchProceedRecord with per-proposed-child result rows containing null/false result fields.
+- [ ] AC-19-132: Enumerated item is supported/enforced: Persisting a batch snapshot is an audit-only mutation and does not mutate governed state or increment governed Plan revision.
+- [ ] AC-19-133: Enumerated item is supported/enforced: Persisted snapshots and batch snapshots use audit revisions separate from governed artifact revisions.
+- [ ] AC-19-134: Enumerated item is supported/enforced: Non-batch persisted snapshots are created only through audit-only snapshot persistence, not normal review producers.
+- [ ] AC-19-135: Enumerated item is supported/enforced: Stale batch snapshot blocks batch mutation.
+- [ ] AC-19-136: Enumerated item is supported/enforced: Ephemeral snapshots become stale when source artifact revisions no longer match.
+- [ ] AC-19-137: Enumerated item is supported/enforced: Single Work Packet path requires AC approval before Work Packet approval.
+- [ ] AC-19-138: Enumerated item is supported/enforced: Single Work Packet path has no combined AC+packet gate.
+- [ ] AC-19-139: Enumerated item is supported/enforced: AC Discuss refinement writes no artifacts until Yes or No.
+- [ ] AC-19-140: Enumerated item is supported/enforced: `work.ac.review` can hash a supplied refined AC payload without mutating artifacts.
+- [ ] AC-19-141: Enumerated item is supported/enforced: `work.ac.approve` rejects reviewed AC payloads that do not match the supplied snapshot hash.
+- [ ] AC-19-142: Enumerated item is supported/enforced: Source-derived ACs are displayed with source/evidence and approved through the AC gate.
+- [ ] AC-19-143: Enumerated item is supported/enforced: Source-derived ACs are excluded from Plan batch approval and batch authorization.
+- [ ] AC-19-144: Enumerated item is supported/enforced: Plan batch approval can approve only explicitly displayed eligible non-source-derived child ACs/packets.
+- [ ] AC-19-145: Enumerated item is supported/enforced: Source-derived children have nullable batch authorization hashes and are excluded from batch authorization.
+- [ ] AC-19-146: Enumerated item is supported/enforced: Plan proposal slice ids and proposed child ids reject values that cannot be used in batch child snapshot revisions.
+- [ ] AC-19-147: Enumerated item is supported/enforced: Batch snapshots store expected created Work Packet revision for every proposed child, independent of authorization eligibility.
+- [ ] AC-19-148: Enumerated item is supported/enforced: ProposedChildrenPayload contains the canonical ProposedWorkPacketPayload used for child snapshots and optional shorthand fields are validation mirrors only.
+- [ ] AC-19-149: Enumerated item is supported/enforced: Proposed child payload equality excludes generated, audit, runtime, evidence, diagnostic, lifecycle-history, and timestamp fields.
+- [ ] AC-19-150: Enumerated item is supported/enforced: BatchReviewSnapshot source artifact refs are derived from the approved Plan, proposed children payload refs, and AC SourceEvidence refs.
+- [ ] AC-19-151: Enumerated item is supported/enforced: Batch child correspondence enforces the same approved Plan slice constraints as one-at-a-time child creation.
+- [ ] AC-19-152: Enumerated item is supported/enforced: Proposed children explicitly map to approved Plan slices through plan_slice_id and created WorkPackets durably store plan_slice_id.
+- [ ] AC-19-153: Enumerated item is supported/enforced: WorkPacket and ProposedWorkPacketPayload include canonical title for Plan child correspondence.
+- [ ] AC-19-154: Enumerated item is supported/enforced: ProposedWorkPacketPayload carries source evidence summary for exact Plan-slice string comparison when applicable.
+- [ ] AC-19-155: Enumerated item is supported/enforced: Source-derived AC evidence uses structured SourceArtifactRefs and source evidence hashes rather than free-form summary matching.
+- [ ] AC-19-156: Enumerated item is supported/enforced: SourceArtifactRef arrays are canonicalized by tuple identity and deterministic ordering before hashing.
+- [ ] AC-19-157: Enumerated item is supported/enforced: SourceArtifact registration creates immutable, content-addressed revisions that SourceArtifactRefs can resolve.
+- [ ] AC-19-158: Enumerated item is supported/enforced: Source evidence kinds and source artifact types are open strings and are not restricted to a finite list of file types.
+- [ ] AC-19-159: Enumerated item is supported/enforced: Batch AC/packet approvals require exact created-child approval-relevant payload and revision match against the ProposedWorkPacketPayload projection used for snapshots.
+- [ ] AC-19-160: Enumerated item is supported/enforced: Proposed child authorization snapshots use ProposedAuthorizationReviewSnapshotPayload with expected created revision semantics.
+- [ ] AC-19-161: Enumerated item is supported/enforced: Child-specific batch snapshot revisions use the exact batch-child revision format and reject ambiguous proposed child ids.
+- [ ] AC-19-162: Enumerated item is supported/enforced: Batch proceed result records child snapshot hashes and revisions for approvals/authorizations actually recorded.
+- [ ] AC-19-163: Enumerated item is supported/enforced: Non-batch Plan children use sequential gates.
+- [ ] AC-19-164: Enumerated item is supported/enforced: Plan proposals do not create draft Plan artifacts; Plan artifacts are created only by Plan approval.
+- [ ] AC-19-165: Enumerated item is supported/enforced: `plan.update` rejects changes to Plan-approved fields unless a registered Plan amendment flow exists.
+- [ ] AC-19-166: Enumerated item is supported/enforced: Runtime baseline acceptance requires human Yes and deterministic validation.
+- [ ] AC-19-167: Enumerated item is supported/enforced: Runtime baseline is not used as diff base.
+- [ ] AC-19-168: Enumerated item is supported/enforced: Packet change baseline is captured at authorization.
+- [ ] AC-19-169: Enumerated item is supported/enforced: VCS and manifest modes compute changed files.
+- [ ] AC-19-170: Enumerated item is supported/enforced: Dirty implementation source at authorization blocks unless resolved.
+- [ ] AC-19-171: Enumerated item is supported/enforced: Implementation source before failure-first blocks validation.
+- [ ] AC-19-172: Enumerated item is supported/enforced: Classification enum is enforced.
+- [ ] AC-19-173: Enumerated item is supported/enforced: `reusable_api`, `rest_api`, and `reusable_ui` always require docs policy `required`.
+- [ ] AC-19-174: Enumerated item is supported/enforced: Human cannot override docs away for API/contract-surface packets.
+- [ ] AC-19-175: Enumerated item is supported/enforced: Non-API docs policies behave as specified.
+- [ ] AC-19-176: Enumerated item is supported/enforced: Non-API packets with docs policy `required` follow docs before tests before failure evidence before implementation.
+- [ ] AC-19-177: Enumerated item is supported/enforced: Operational-document packets require docs/content policy `required`.
+- [ ] AC-19-178: Enumerated item is supported/enforced: Operational-document packets can mark tests/failure-first not applicable only when no product behavior changes.
+- [ ] AC-19-179: Enumerated item is supported/enforced: Documentation itself is never tested; retained docs tests block review.
+- [ ] AC-19-180: Enumerated item is supported/enforced: Docs-updated claims are required and passed before review completion when docs are required, docs policy is `changed`, docs files changed, or docs policy changed.
+- [ ] AC-19-181: Enumerated item is supported/enforced: Docs policy `changed` requires docs-updated verification before review completion without a later semantic documented-behavior-changed judgment.
+- [ ] AC-19-182: Enumerated item is supported/enforced: Direct docs/content file changes without docs evidence register or expose missing docs-updated claims and block review.
+- [ ] AC-19-183: Enumerated item is supported/enforced: Required verification matrix is enforced.
+- [ ] AC-19-184: Enumerated item is supported/enforced: Disabled/misconfigured verifier blocks required semantic checks.
+- [ ] AC-19-185: Enumerated item is supported/enforced: Command adapter is executable and health-checkable.
+- [ ] AC-19-186: Enumerated item is supported/enforced: Optional adapters are not selectable unless executable.
+- [ ] AC-19-187: Enumerated item is supported/enforced: Invalid verifier responses do not satisfy gates.
+- [ ] AC-19-188: Enumerated item is supported/enforced: Human-intent judgments in verifier findings are invalid.
+- [ ] AC-19-189: Enumerated item is supported/enforced: API/contract-surface chain enforces docs before tests before failure evidence before implementation.
+- [ ] AC-19-190: Enumerated item is supported/enforced: Non-API docs-required chain enforces docs before tests before failure evidence before implementation.
+- [ ] AC-19-191: Enumerated item is supported/enforced: Non-API docs-not-required chain enforces tests before failure evidence before implementation.
+- [ ] AC-19-192: Enumerated item is supported/enforced: Operational-document docs-only chain enforces docs/content validation and no product source changes.
+- [ ] AC-19-193: Enumerated item is supported/enforced: Failure evidence semantic verification is required when failure is used to prove missing approved behavior.
+- [ ] AC-19-194: Enumerated item is supported/enforced: Allowed globs apply to product-scope files and exempt Spec Guard artifacts/evidence from blocking.
+- [ ] AC-19-195: Enumerated item is supported/enforced: Approval and authorization can occur before docs/tests/failure-first.
+- [ ] AC-19-196: Enumerated item is supported/enforced: Implementation source cannot change until implementation-ready.
+- [ ] AC-19-197: Enumerated item is supported/enforced: Tests must clean up files, database tables/rows, external resources, processes, and runtime state.
+- [ ] AC-19-198: Enumerated item is supported/enforced: Command-backed evidence references kernel-created CommandResult records and never trusts caller-supplied exit codes or command status.
+- [ ] AC-19-199: Enumerated item is supported/enforced: CommandResult records include execution context and durable storage references.
+- [ ] AC-19-200: Enumerated item is supported/enforced: Evidence actions map timed out and skipped command results to inconclusive and do not use them to satisfy required evidence gates.
+- [ ] AC-19-201: Enumerated item is supported/enforced: Evidence actions reject CommandResults with incompatible purpose.
+- [ ] AC-19-202: Enumerated item is supported/enforced: Review requires traceability, cleanup verification, and required backend verification.
+- [ ] AC-19-203: Enumerated item is supported/enforced: Cleanup evidence action records checked resources and side-effect status.
+- [ ] AC-19-204: Enumerated item is supported/enforced: Not-applicable evidence action records tests/failure-first not-applicable reasons only with deterministic eligibility. Human confirmation, when collected, only acknowledges the eligible determination.
+- [ ] AC-19-205: Enumerated item is supported/enforced: Batch authorization readiness is evaluated against proposed child payloads and snapshot bindings.
+- [ ] AC-19-206: Enumerated item is supported/enforced: Batch authorization captures PacketChangeBaseline per authorized child or leaves that child unauthorized with diagnostics.
+- [ ] AC-19-207: Enumerated item is supported/enforced: Final claims require support or explicit unverified labeling; unverified claims cannot satisfy review completion.
+- [ ] AC-19-208: Enumerated item is supported/enforced: Every shared workflow action has CLI and MCP mapping unless bootstrap-only or local-runtime-only.
+- [ ] AC-19-209: Enumerated item is supported/enforced: Human-gated actions require selected number, raw response, decision prompt, and human confirmation.
+- [ ] AC-19-210: Enumerated item is supported/enforced: Review-bound approval actions require review snapshot hash, revision, and source artifact refs when using ephemeral snapshots.
+- [ ] AC-19-211: Enumerated item is supported/enforced: `work.plan_choice.answer` records the registered Plan-vs-single fixed decision.
+- [ ] AC-19-212: Enumerated item is supported/enforced: `plan.propose` hashes a complete Plan proposal payload.
+- [ ] AC-19-213: Enumerated item is supported/enforced: `plan.approve` rejects Plan proposal payloads that do not match the supplied snapshot hash.
+- [ ] AC-19-214: Enumerated item is supported/enforced: Plan approval and batch proceed have concrete shared actions.
+- [ ] AC-19-215: Enumerated item is supported/enforced: `command.run` creates deterministic CommandResult records used by command-backed evidence.
+- [ ] AC-19-216: Enumerated item is supported/enforced: `plan.batch_snapshot.create` requires proposed children payload and records only an audit snapshot.
+- [ ] AC-19-217: Enumerated item is supported/enforced: `plan.child.create` creates one child only when tied to an approved Plan proposal/slice and matching child constraints, with proposed_child_id equal to plan_slice_id.
+- [ ] AC-19-218: Enumerated item is supported/enforced: Evidence actions register or reference stable claims for required backend verification.
+- [ ] AC-19-219: Enumerated item is supported/enforced: Human decisions cannot be patched; supersession is append-only.
+- [ ] AC-19-220: Enumerated item is supported/enforced: MCP calls shared core directly and never shells out to CLI.
+- [ ] AC-19-221: Enumerated item is supported/enforced: `npx spec-guard init` successful default output is plain text, includes generated file paths and next steps, and is not parseable as JSON.
+- [ ] AC-19-222: Enumerated item is supported/enforced: `npx spec-guard init --json` returns the standard shared action result JSON.
+- [ ] AC-19-223: Enumerated item is supported/enforced: Init writes project-visible MCP configs for generic/Claude, Cursor, VS Code, Cline, Roo, and Windsurf clients.
+- [ ] AC-19-224: Enumerated item is supported/enforced: Init writes `.pi/extensions/spec-guard.ts`, and Pi discovers direct `spec_guard_*` tools after startup or `/reload`.
+- [ ] AC-19-225: Enumerated item is supported/enforced: The generated Pi extension module is loadable by Pi's factory contract: importing/loading the generated file yields a default-exported factory function, invoking the factory with a mock or real `ExtensionAPI` registers expected `spec_guard_*` tools, and no tools-only or named-export-only extension is accepted.
+- [ ] AC-19-226: Enumerated item is supported/enforced: Generated MCP/Pi tool descriptions make status/quickstart and human-gated fields obvious without source inspection.
+- [ ] AC-19-227: Enumerated item is supported/enforced: Action result schema is consistent.
+- [ ] AC-19-228: Enumerated item is supported/enforced: `serve.viewer` starts a real listening HTTP server on the requested host/port, returns a successful HTTP response for the dashboard, and keeps the CLI process/server alive until explicitly terminated.
+- [ ] AC-19-229: Enumerated item is supported/enforced: Viewer renders human-readable approval pages with hashes.
+- [ ] AC-19-230: Enumerated item is supported/enforced: Viewer uses Mantine components/theme or Mantine-backed project wrappers for dashboard/review layout, cards, badges, tables/lists, buttons/links, and action states.
+- [ ] AC-19-231: Enumerated item is supported/enforced: Viewer dashboard follows industry-standard dashboard layout patterns with an overview-first responsive metric-card grid, clear status hierarchy, and drill-down navigation.
+- [ ] AC-19-232: Enumerated item is supported/enforced: Viewer dashboard exposes full artifact metric cards for total artifacts, totals by artifact type, counts by type/status, workflow-stage counts, baseline, verifier, pending gates, blocked state, validation failures, runtime evidence, and final claim support.
+- [ ] AC-19-233: Enumerated item is supported/enforced: Each dashboard count card is clickable and opens a filtered artifact list whose visible total/row count matches the card count, with artifact identifiers, type, status/stage, pending action where applicable, and detail/review links.
+- [ ] AC-19-234: Enumerated item is supported/enforced: Cards requiring user action are visually distinct from passive informational cards using Mantine-supported non-color-only emphasis.
+- [ ] AC-19-235: Enumerated item is supported/enforced: Viewer dashboard and `config.check` derive their summary from persisted artifacts: a test must create a real artifact through a shared workflow action such as `work.intake`, then assert total artifact counts, artifact counts by type, lifecycle/workflow-stage counts, and pending-gate summary changes without using fake viewer data.

@@ -28,10 +28,253 @@ As a governance auditor, I want decision binding and review snapshots implemente
 
 ## Acceptance criteria
 
-- [ ] Every review-bound gate has a snapshot producer before recording the human decision.
-- [ ] Snapshot payloads use deterministic canonical serialization and SHA-256 hashes.
-- [ ] Approval actions validate submitted snapshot hash/revision/source refs before mutating governed state.
-- [ ] Approved fields are derived from registered decision type and stored as canonical JSON pointers.
-- [ ] Changing approved paths invalidates dependent decisions and lifecycle readiness as specified.
-- [ ] HumanDecision records are append-only and substance-immutable.
-- [ ] Authorization and batch review snapshots include the required payloads, refs, hashes, and child-decision bindings.
+<!-- Expanded from agentic-redesign.md to provide behavior-level coverage. -->
+
+- [ ] AC-04-001: This section is normative for every human decision that accepts, approves, authorizes, or records governed intent.
+- [ ] AC-04-002: A review snapshot is the exact structured content shown to the human for a decision.
+- [ ] AC-04-003: A review snapshot must:
+- [ ] AC-04-004: include all fields the human is deciding on,
+- [ ] AC-04-005: include enough rendered context for the human-readable viewer and agent session to match the same decision surface,
+- [ ] AC-04-006: A snapshot producer must hash the named snapshot payload schema, not the physical artifact file.
+- [ ] AC-04-007: Top-level common fields, audit logs, decision history, evidence, backend verifications, command outputs, and diagnostics are excluded unless the named payload schema includes them.
+- [ ] AC-04-008: Preserve array order, except arrays explicitly defined as canonical sets.
+- [ ] AC-04-009: Use UTF-8 JSON without insignificant whitespace.
+- [ ] AC-04-010: Timestamps in canonical payloads must be UTC RFC 3339 strings with millisecond precision and `Z` suffix.
+- [ ] AC-04-011: Numbers in canonical payloads must be integers unless a schema explicitly permits another numeric form.
+- [ ] AC-04-012: Spec Guard supports three snapshot categories.
+- [ ] AC-04-013: is not stored as an artifact.
+- [ ] AC-04-014: Direct-payload snapshots with no source artifact may use an empty `source_artifact_refs` array
+- [ ] AC-04-015: Review-bound decision actions using ephemeral snapshots must submit the `source_artifact_refs` returned by the snapshot producer.
+- [ ] AC-04-016: The revision increment caused by recording the approving decision, accepted state, authorization, or lifecycle event does not make the just-recorded decision stale.
+- [ ] AC-04-017: If the action returns a post-mutation reference, that reference names the post-mutation revision explicitly, while the review snapshot remains bound to the pre-mutation payload revision it reviewed.
+- [ ] AC-04-018: A persisted review snapshot is stored for audit/replay.
+- [ ] AC-04-019: Persisting a review snapshot is an audit mutation only.
+- [ ] AC-04-020: It must not approve, reject, authorize, create product work, change intent, or advance lifecycle state.
+- [ ] AC-04-021: `persisted:<audit_revision>`
+- [ ] AC-04-022: where `audit_revision` is a monotonic audit sequence scoped to the owning artifact or standalone audit log named by the persisted snapshot record.
+- [ ] AC-04-023: must not affect approval staleness.
+- [ ] AC-04-024: A batch review snapshot is a persisted review snapshot required for Plan batch proceed.
+- [ ] AC-04-025: It contains canonical proposed child payloads and child-specific review hashes before child Work Packet artifacts are created.
+- [ ] AC-04-026: Its `snapshot_revision` uses the same `persisted:<audit_revision>` format, where `audit_revision` is the batch snapshot audit sequence and not the governed Plan revision.
+- [ ] AC-04-027: Every review-bound gate must have a snapshot producer before the human decision is recorded.
+- [ ] AC-04-028: Required snapshot producers:
+- [ ] AC-04-029: The required pattern is:
+- [ ] AC-04-030: returns snapshot hash/revision.
+- [ ] AC-04-031: Spec Guard validates that the submitted payload or current artifact content hashes to the supplied snapshot hash before mutating governed state.
+- [ ] AC-04-032: Stale or mismatched snapshot hashes block governed mutation.
+- [ ] AC-04-033: Snapshot producers may return compact summaries and full payloads.
+- [ ] AC-04-034: Approval actions must not depend on frontend-agent summaries when validating snapshot hashes.
+- [ ] AC-04-035: Decision ids/hashes embedded in payloads are not SourceArtifactRefs unless the decision is stored as a standalone top-level artifact.
+- [ ] AC-04-036: Built-in artifact refs must use the artifact's stored canonical `artifact_type`, `id`, and `revision`.
+- [ ] AC-04-037: SourceArtifactRefs in these arrays are canonical sets using the ordering rules in Appendix A.
+- [ ] AC-04-038: Non-batch snapshot producers are ephemeral-only.
+- [ ] AC-04-039: If an implementation wants to retain one for audit/replay, it must persist it through a separate audit-only snapshot persistence action that does not change governed state.
+- [ ] AC-04-040: Persisting a non-batch snapshot must not be required for normal gate operation.
+- [ ] AC-04-041: Non-batch persisted review snapshots live in a ReviewSnapshot audit log.
+- [ ] AC-04-042: The log may be embedded in the owning artifact or stored as standalone ReviewSnapshot records, but every record must have an `audit_revision` scoped to that log
+- [ ] AC-04-043: must be resolvable later by producer action id, snapshot hash, and snapshot revision.
+- [ ] AC-04-044: Ephemeral snapshot payloads may still be copied into immutable decision records when the approved-field root is not otherwise durable.
+- [ ] AC-04-045: This copy is decision payload storage, not a persisted `ReviewSnapshot` artifact, and it exists so audit and invalidation can compare later state against the exact approved payload.
+- [ ] AC-04-046: When stored in a HumanDecision, `approved_payload_revision` must be `payload:<approved_payload_hash>` and `reviewed_payload_revision` must be `payload:<reviewed_payload_hash>`.
+- [ ] AC-04-047: Every approval/acceptance/authorization decision record must include `approved_fields`.
+- [ ] AC-04-048: For standard gates, Spec Guard derives `approved_fields` deterministically from `decision_type`
+- [ ] AC-04-049: Custom decision actions must either use a registered decision type with a known field set or provide an explicit approved field set that deterministic validation accepts.
+- [ ] AC-04-050: Standard approved field sets are canonical JSON pointer sets relative to the listed root payload:
+- [ ] AC-04-051: Approved JSON pointers must be exact canonical paths in the named root payload.
+- [ ] AC-04-052: Wildcards, prose fragments, nonexistent schema paths, and frontend-only labels are not valid approved-field entries.
+- [ ] AC-04-053: When a final approving/selecting decision has an approved-field root payload that is not a durable top-level artifact path, Spec Guard must persist the canonical approved payload, payload hash, and payload revision in an immutable record named by the root payload.
+- [ ] AC-04-054: For `implementation_authorization`, that record is the authorization HumanDecision.
+- [ ] AC-04-055: For `plan_batch_proceed`, that record is the Plan's BatchProceedRecord selection payload.
+- [ ] AC-04-056: Invalidation compares the stored approved payload with the current deterministically reconstructed payload or with the stored batch proceed selection payload as applicable.
+- [ ] AC-04-057: Decline, block, and Discuss paths do not create approved payloads.
+- [ ] AC-04-058: `plan_batch_proceed`, `batch_ac_approval`, and `batch_work_packet_approval` are the only standard decision types whose approved-field root is stored in a sibling record rather than duplicated into the HumanDecision.
+- [ ] AC-04-059: The batch proceed HumanDecision must record `approved_payload_ref` pointing to the BatchProceedRecord selection hash and revision.
+- [ ] AC-04-060: Batch child AC and Work Packet approval HumanDecisions must record `approved_payload_ref` pointing to the exact ProposedWorkPacketPayload stored in the BatchReviewSnapshot child payload
+- [ ] AC-04-061: These decisions must not duplicate full approved payloads unless an implementation also keeps the referenced sibling payload as canonical.
+- [ ] AC-04-062: must not be nested under `/plan_proposal`.
+- [ ] AC-04-063: For Work Packet approval, `/docs/requirements` and `/scope/deviations` are review context unless explicitly added to an approved-field set by a future decision type.
+- [ ] AC-04-064: Changing them does not by itself invalidate Work Packet approval, but may affect readiness, docs validation, allowed-globs diagnostics, or review completion.
+- [ ] AC-04-065: For implementation authorization, `/change_baseline_capture_plan` approves the baseline capture method and metadata shown before authorization.
+- [ ] AC-04-066: It does not approve the later captured `PacketChangeBaseline` contents, which are recorded atomically with authorization after capture succeeds.
+- [ ] AC-04-067: Generic updates must not change Plan-approved paths.
+- [ ] AC-04-068: If a future registered Plan amendment action changes Plan-approved paths, it invalidates batch snapshots, child creation eligibility, batch approvals, and batch authorizations derived from that Plan
+- [ ] AC-04-069: must record a new Plan approval decision before the Plan is treated as approved again.
+- [ ] AC-04-070: Superseding a human decision invalidates downstream decisions that depend on the superseded decision unless the new decision explicitly re-approves the same canonical path set and snapshot content.
+- [ ] AC-04-071: Invalidating AC approval moves a packet to `pending_ac_approval` unless archived/deferred.
+- [ ] AC-04-072: Invalidating Work Packet approval moves a packet to `pending_packet_approval` after AC approval remains valid, or `pending_ac_approval` if AC approval is also invalid.
+- [ ] AC-04-073: Invalidating implementation authorization removes implementation-ready state
+- [ ] AC-04-074: moves the packet to `approved` when packet approval remains valid.
+- [ ] AC-04-075: Invalidating pre-implementation validation after implementation has started moves the packet to `blocked` with diagnostics requiring human resolution or a new packet.
+- [ ] AC-04-076: Invalidating approval after `review_complete` marks review completion stale
+- [ ] AC-04-077: moves the packet to `blocked` with diagnostics requiring renewed approval and review completion.
+- [ ] AC-04-078: Every human decision record that records an approving, accepting, authorizing, selecting, declining, or blocking numbered choice must include:
+- [ ] AC-04-079: source artifact references returned by the snapshot producer when review-bound,
+- [ ] AC-04-080: reviewed payload, reviewed payload hash, and reviewed payload revision when a declined or blocked review-bound decision retains the rejected surface for audit,
+- [ ] AC-04-081: Human decision records are append-only and substance-immutable after creation.
+- [ ] AC-04-082: Spec Guard must not expose actions that patch the substance of a recorded human decision.
+- [ ] AC-04-083: Corrections or changes must be represented by a new decision that supersedes the prior decision.
+- [ ] AC-04-084: The only permitted update to an existing HumanDecision is metadata-only linkage: setting `superseded_by_decision_id` after a later superseding decision is recorded, or archive metadata that hides a decision from default views.
+- [ ] AC-04-085: Metadata-only linkage must not change prompt text, raw response, selected number, normalized decision, approved fields, approved payload, snapshot fields, or source interface.
+- [ ] AC-04-086: No/decline/block decisions must use `approved_fields: []` unless a registered decision type explicitly defines non-approval fields being selected.
+- [ ] AC-04-087: They do not require `approved_payload`, even when the corresponding Yes/selection decision type would use a non-durable approved-field root.
+- [ ] AC-04-088: If the reviewed but rejected payload is retained, it must be stored as `reviewed_payload`, not `approved_payload`.
+- [ ] AC-04-089: Discuss selections must not create HumanDecision records.
+- [ ] AC-04-090: If Discuss is audited, it must be recorded as a ChoiceAnswer or audit record with no governed decision state mutation.
+- [ ] AC-04-091: If a human selects Yes but deterministic validation or an atomic side effect fails before the governed gate can be satisfied, Spec Guard must not record the approving HumanDecision.
+- [ ] AC-04-092: It may record an audit-only GateAttempt/ChoiceAnswer with the raw response, prompt, selected number, diagnostics, and failed action.
+- [ ] AC-04-093: The governed state remains at the prior lifecycle/status except for diagnostics and audit records.
+- [ ] AC-04-094: The authorization snapshot payload must include:
+- [ ] AC-04-095: allowed globs,
+- [ ] AC-04-096: packet change baseline capture plan,
+- [ ] AC-04-097: On numbered Yes, `work.authorize` must store the exact canonical AuthorizationReviewSnapshotPayload in the authorization HumanDecision as `approved_payload`, along with `approved_payload_hash` and `approved_payload_revision`.
+- [ ] AC-04-098: Later authorization staleness and invalidation must recompute the authorization review payload from current durable state
+- [ ] AC-04-099: compare the approved JSON pointer paths against this stored payload.
+- [ ] AC-04-100: A Plan batch proceed decision must bind to a batch review snapshot.
+- [ ] AC-04-101: The batch review snapshot must exist before the human selects a batch proceed option.
+- [ ] AC-04-102: A batch review snapshot must include:
+- [ ] AC-04-103: source artifact references used to bind the batch decision,
+- [ ] AC-04-104: expected created Work Packet revision,
+- [ ] AC-04-105: whether the child contains source-derived ACs,
+- [ ] AC-04-106: child-specific snapshot hashes and revisions derived from the proposed payload.
+- [ ] AC-04-107: Child-specific batch snapshot revisions must use this exact deterministic format:
+- [ ] AC-04-108: where `batch_audit_revision` is the persisted batch snapshot audit revision, `proposed_child_id` is the id in the proposed child payload, `producer_action_id` is `work.ac.review`, `work.packet.review`, or `work.authorization.review`, and `payload_hash` is the hash of the child-specific snapshot payload.
+- [ ] AC-04-109: Proposed child ids used in this revision format must match `^[A-Za-z0-9._-]+$`
+- [ ] AC-04-110: must not contain `:`.
+- [ ] AC-04-111: Spec Guard must reject proposed child ids that cannot be serialized unambiguously in this format.
+- [ ] AC-04-112: Child-specific batch snapshot revision derivation uses the same validated proposed child identity that Plan child creation validates.
+- [ ] AC-04-114: When a batch action creates child artifacts
+- [ ] AC-04-115: records approvals, each child decision stores:
+- [ ] AC-04-116: child-specific proposed authorization snapshot hash and revision when authorization is batch-recorded,
+- [ ] AC-04-117: approved fields derived for that child decision.
+- [ ] AC-04-118: The single numbered batch prompt is the human gate for each displayed eligible child approval/authorization it requests.
+- [ ] AC-04-119: For every child approval or authorization recorded by batch proceed, Spec Guard must create a child HumanDecision with `source_interface: "batch"`, `selected_number` equal to the batch option, `prompt_text` equal to the batch prompt, `parent_batch_snapshot_hash` and `parent_batch_snapshot_revision` populated, `review_snapshot_hash` and `review_snapshot_revision` set to that child's AC, packet, or authorization snapshot, and `source_artifact_refs` set to the canonical union of the parent BatchReviewSnapshot `source_artifact_refs` and that child entry's `source_artifact_refs`.
+- [ ] AC-04-120: These child decisions use decision types `batch_ac_approval`, `batch_work_packet_approval`, and `batch_child_implementation_authorization`
+- [ ] AC-04-121: Batch child AC and Work Packet approval decisions must set `approved_payload_ref` to the child's canonical ProposedWorkPacketPayload inside the BatchReviewSnapshot using an ApprovedPayloadRef with record type `batch_review_snapshot`, payload pointer `/children/<index>/proposed_work_payload`, and that ProposedWorkPacketPayload hash/revision.
+- [ ] AC-04-122: Batch AC approval and batch Work Packet approval are valid only if the created child's approval-relevant payload exactly matches the `ProposedWorkPacketPayload` projection used to compute the child AC and packet review snapshots, and the created child revision matches the `expected_created_work_packet_revision` recorded for that child in the batch snapshot.
+- [ ] AC-04-123: Generated, audit, runtime, evidence, lifecycle-history, diagnostic, and timestamp fields are excluded from this equality check unless explicitly included in `ProposedWorkPacketPayload`.
+- [ ] AC-04-124: If the created child approval-relevant payload or expected revision differs, Spec Guard must create the child without batch approval and report diagnostics.
+- [ ] AC-04-125: AC batch approval compares `ProposedWorkPacketPayload.acceptance_criteria` to the created WorkPacket `/acceptance_criteria`.
+- [ ] AC-04-126: Work Packet batch approval compares `ProposedWorkPacketPayload` fields `title`, `parent_plan_id`, `plan_slice_id`, `classification`, `intent`, `acceptance_criteria`, `docs.policy`, `docs.none_required_reason`, `docs.not_applicable_reason`, `scope.allowed_globs`, `platform`, `architecture`, and `runtime_baseline_ref` to the corresponding created WorkPacket fields.
+- [ ] AC-04-127: Batch authorization compares `ProposedWorkPacketPayload.id`, `parent_plan_id`, `plan_slice_id`, `scope.allowed_globs`, and `runtime_baseline_ref`, plus the proposed packet snapshot hash/revision and authorization review fields, to the created WorkPacket and captured authorization record.
+- [ ] AC-04-128: `docs.requirements` and `scope.deviations` are present in `ProposedWorkPacketPayload` for child creation and review context, but they are not part of Work Packet batch approval unless also represented in the approved-field set for that decision type.
+- [ ] AC-04-129: A proposed child authorization snapshot is valid only inside a persisted batch review snapshot.
+- [ ] AC-04-130: It uses `ProposedAuthorizationReviewSnapshotPayload`, not `AuthorizationReviewSnapshotPayload`, because the child Work Packet artifact does not exist yet.
+- [ ] AC-04-131: It is computed from the proposed child `ProposedWorkPacketPayload`, expected created Work Packet revision, the proposed child packet snapshot hash, accepted runtime baseline reference, allowed globs, batch-authorization-ready diagnostics, and packet change baseline capture plan.
+- [ ] AC-04-132: The expected created Work Packet revision is `1`.
+- [ ] AC-04-133: When the child artifact is created by batch proceed, Spec Guard records authorization against the created child only if the created child's authorization projection exactly matches the `ProposedWorkPacketPayload` authorization projection used by the proposed authorization snapshot and the created child revision matches the expected revision.
+- [ ] AC-04-134: The batch child authorization HumanDecision must use decision type `batch_child_implementation_authorization`
+- [ ] AC-04-135: store the exact canonical ProposedAuthorizationReviewSnapshotPayload as `approved_payload`, with its payload hash and revision.
+- [ ] AC-04-136: Batch child mutation sequence is normative: create child WorkPacket at revision 1, compare the created child's approval-relevant projections against the batch snapshot payload, record batch AC approval in a later child revision when applicable, record batch Work Packet approval in a later child revision when applicable, then capture PacketChangeBaseline
+- [ ] AC-04-137: record authorization in a later child revision when applicable.
+- [ ] AC-04-138: Child decisions must store the child revision observed at the moment that decision is recorded in `HumanDecision.target_artifact_revision`.
+- [ ] AC-04-139: The `expected_created_work_packet_revision` check applies only to the newly created child before approval/authorization mutations.
+- [ ] AC-04-140: This allows option 4 to create, approve, and authorize eligible children in one action without losing per-child approval binding.
+- [ ] AC-04-141: The batch action must reject stale batch snapshot hashes.
+- [ ] AC-04-142: Source-derived ACs are never batch-approved or batch-authorized.
+- [ ] AC-04-143: A child containing source-derived ACs may be created by a batch action, but its AC approval, Work Packet approval, and authorization must proceed through the normal per-child gates.
+- [ ] AC-04-144: Enumerated item is supported/enforced: include all fields the human is deciding on,
+- [ ] AC-04-145: Enumerated item is supported/enforced: exclude volatile fields not part of the decision, such as transient diagnostics timestamps and command output buffers,
+- [ ] AC-04-146: Enumerated item is supported/enforced: include enough rendered context for the human-readable viewer and agent session to match the same decision surface,
+- [ ] AC-04-147: Enumerated item is supported/enforced: have a deterministic hash and revision.
+- [ ] AC-04-148: Ordered requirement is supported/enforced: Recursively sort object keys by Unicode code point order over key strings.
+- [ ] AC-04-149: Ordered requirement is supported/enforced: Preserve array order, except arrays explicitly defined as canonical sets.
+- [ ] AC-04-150: Ordered requirement is supported/enforced: Use UTF-8 JSON without insignificant whitespace.
+- [ ] AC-04-151: Ordered requirement is supported/enforced: Encode absent optional fields as absent, not null, unless null is semantically meaningful.
+- [ ] AC-04-152: Ordered requirement is supported/enforced: Timestamps in canonical payloads must be UTC RFC 3339 strings with millisecond precision and `Z` suffix.
+- [ ] AC-04-153: Ordered requirement is supported/enforced: Numbers in canonical payloads must be integers unless a schema explicitly permits another numeric form.
+- [ ] AC-04-154: Ordered requirement is supported/enforced: Hash canonical bytes with SHA-256 and encode the digest as lowercase hexadecimal without a prefix.
+- [ ] AC-04-155: Ordered requirement is supported/enforced: A snapshot producer renders the exact decision payload and returns snapshot hash/revision.
+- [ ] AC-04-156: Ordered requirement is supported/enforced: The frontend agent presents that exact payload to the human.
+- [ ] AC-04-157: Ordered requirement is supported/enforced: The decision action submits selected number, raw response, exact prompt, human confirmation, and the relevant snapshot hash/revision.
+- [ ] AC-04-158: Ordered requirement is supported/enforced: Spec Guard validates that the submitted payload or current artifact content hashes to the supplied snapshot hash before mutating governed state.
+- [ ] AC-04-159: Ordered requirement is supported/enforced: Stale or mismatched snapshot hashes block governed mutation.
+- [ ] AC-04-160: Enumerated item is supported/enforced: Changing AC-approved paths invalidates Work Packet approval, implementation authorization, pre-implementation validation, review completion, and final claim validation for that packet.
+- [ ] AC-04-161: Enumerated item is supported/enforced: Changing Work-Packet-approved paths invalidates implementation authorization, pre-implementation validation, review completion, and final claim validation for that packet.
+- [ ] AC-04-162: Enumerated item is supported/enforced: Changing runtime baseline accepted paths invalidates packet approvals and authorizations that reference that baseline revision.
+- [ ] AC-04-163: Enumerated item is supported/enforced: Generic updates must not change Plan-approved paths. If a future registered Plan amendment action changes Plan-approved paths, it invalidates batch snapshots, child creation eligibility, batch approvals, and batch authorizations derived from that Plan and must record a new Plan approval decision before the Plan is treated as approved again.
+- [ ] AC-04-164: Enumerated item is supported/enforced: Superseding a human decision invalidates downstream decisions that depend on the superseded decision unless the new decision explicitly re-approves the same canonical path set and snapshot content.
+- [ ] AC-04-165: Enumerated item is supported/enforced: Invalidating AC approval moves a packet to `pending_ac_approval` unless archived/deferred.
+- [ ] AC-04-166: Enumerated item is supported/enforced: Invalidating Work Packet approval moves a packet to `pending_packet_approval` after AC approval remains valid, or `pending_ac_approval` if AC approval is also invalid.
+- [ ] AC-04-167: Enumerated item is supported/enforced: Invalidating implementation authorization removes implementation-ready state and moves the packet to `approved` when packet approval remains valid.
+- [ ] AC-04-168: Enumerated item is supported/enforced: Invalidating pre-implementation validation after implementation has started moves the packet to `blocked` with diagnostics requiring human resolution or a new packet.
+- [ ] AC-04-169: Enumerated item is supported/enforced: Invalidating approval after `review_complete` marks review completion stale and moves the packet to `blocked` with diagnostics requiring renewed approval and review completion.
+- [ ] AC-04-170: Enumerated item is supported/enforced: id,
+- [ ] AC-04-171: Enumerated item is supported/enforced: decision type,
+- [ ] AC-04-172: Enumerated item is supported/enforced: prompt id,
+- [ ] AC-04-173: Enumerated item is supported/enforced: exact prompt text,
+- [ ] AC-04-174: Enumerated item is supported/enforced: raw response,
+- [ ] AC-04-175: Enumerated item is supported/enforced: selected number,
+- [ ] AC-04-176: Enumerated item is supported/enforced: normalized decision,
+- [ ] AC-04-177: Enumerated item is supported/enforced: approved fields,
+- [ ] AC-04-178: Enumerated item is supported/enforced: review snapshot hash and revision when review-bound,
+- [ ] AC-04-179: Enumerated item is supported/enforced: source artifact references returned by the snapshot producer when review-bound,
+- [ ] AC-04-180: Enumerated item is supported/enforced: approved payload, approved payload hash, and approved payload revision when the decision approves/selects a final numbered option and the approved-field root is not otherwise durable, except for `plan_batch_proceed`,
+- [ ] AC-04-181: Enumerated item is supported/enforced: approved payload reference when the decision type is `plan_batch_proceed`, pointing to the canonical BatchProceedRecord selection payload,
+- [ ] AC-04-182: Enumerated item is supported/enforced: reviewed payload, reviewed payload hash, and reviewed payload revision when a declined or blocked review-bound decision retains the rejected surface for audit,
+- [ ] AC-04-183: Enumerated item is supported/enforced: custom response if any,
+- [ ] AC-04-184: Enumerated item is supported/enforced: supersedes decision id if applicable,
+- [ ] AC-04-185: Enumerated item is supported/enforced: superseded by decision id if applicable,
+- [ ] AC-04-186: Enumerated item is supported/enforced: source interface,
+- [ ] AC-04-187: Enumerated item is supported/enforced: at timestamp.
+- [ ] AC-04-188: Enumerated item is supported/enforced: Work Packet id,
+- [ ] AC-04-189: Enumerated item is supported/enforced: current Work Packet revision,
+- [ ] AC-04-190: Enumerated item is supported/enforced: approved packet snapshot hash and revision,
+- [ ] AC-04-191: Enumerated item is supported/enforced: authorization-ready diagnostics,
+- [ ] AC-04-192: Enumerated item is supported/enforced: allowed globs,
+- [ ] AC-04-193: Enumerated item is supported/enforced: runtime baseline reference,
+- [ ] AC-04-194: Enumerated item is supported/enforced: packet change baseline capture plan,
+- [ ] AC-04-195: Enumerated item is supported/enforced: expected file category policy,
+- [ ] AC-04-196: Enumerated item is supported/enforced: implementation boundary summary.
+- [ ] AC-04-197: Enumerated item is supported/enforced: Plan id,
+- [ ] AC-04-198: Enumerated item is supported/enforced: governed Plan revision,
+- [ ] AC-04-199: Enumerated item is supported/enforced: approved Plan proposal hash and revision,
+- [ ] AC-04-200: Enumerated item is supported/enforced: source artifact references used to bind the batch decision,
+- [ ] AC-04-201: Enumerated item is supported/enforced: proposed children payload hash and snapshot revision,
+- [ ] AC-04-202: Enumerated item is supported/enforced: batch prompt text,
+- [ ] AC-04-203: Enumerated item is supported/enforced: available batch options,
+- [ ] AC-04-204: Enumerated item is supported/enforced: for each proposed child:
+- [ ] AC-04-205: Enumerated item is supported/enforced: Plan slice id,
+- [ ] AC-04-206: Enumerated item is supported/enforced: proposed child id,
+- [ ] AC-04-207: Enumerated item is supported/enforced: expected created Work Packet revision,
+- [ ] AC-04-208: Enumerated item is supported/enforced: canonical ProposedWorkPacketPayload,
+- [ ] AC-04-209: Enumerated item is supported/enforced: full proposed child AC review snapshot payload and rendered summary,
+- [ ] AC-04-210: Enumerated item is supported/enforced: full child packet review snapshot payload and rendered summary,
+- [ ] AC-04-211: Enumerated item is supported/enforced: full proposed child authorization review snapshot payload and rendered summary when batch-authorization-eligible,
+- [ ] AC-04-212: Enumerated item is supported/enforced: whether the child contains source-derived ACs,
+- [ ] AC-04-213: Enumerated item is supported/enforced: batch approval eligibility,
+- [ ] AC-04-214: Enumerated item is supported/enforced: batch authorization eligibility,
+- [ ] AC-04-215: Enumerated item is supported/enforced: ineligibility diagnostics,
+- [ ] AC-04-216: Enumerated item is supported/enforced: readiness diagnostics for AC approval, packet approval, and batch authorization,
+- [ ] AC-04-217: Enumerated item is supported/enforced: child-specific snapshot hashes and revisions derived from the proposed payload.
+- [ ] AC-04-218: Enumerated item is supported/enforced: parent batch snapshot hash and revision,
+- [ ] AC-04-219: Enumerated item is supported/enforced: child-specific AC snapshot hash and revision when ACs are batch-approved,
+- [ ] AC-04-220: Enumerated item is supported/enforced: child-specific packet snapshot hash and revision when packet is batch-approved,
+- [ ] AC-04-221: Enumerated item is supported/enforced: child-specific proposed authorization snapshot hash and revision when authorization is batch-recorded,
+- [ ] AC-04-222: Enumerated item is supported/enforced: approved fields derived for that child decision.
+- [ ] AC-04-223: Enumerated item is supported/enforced: AC batch approval compares `ProposedWorkPacketPayload.acceptance_criteria` to the created WorkPacket `/acceptance_criteria`.
+- [ ] AC-04-224: Enumerated item is supported/enforced: Work Packet batch approval compares `ProposedWorkPacketPayload` fields `title`, `parent_plan_id`, `plan_slice_id`, `classification`, `intent`, `acceptance_criteria`, `docs.policy`, `docs.none_required_reason`, `docs.not_applicable_reason`, `scope.allowed_globs`, `platform`, `architecture`, and `runtime_baseline_ref` to the corresponding created WorkPacket fields.
+- [ ] AC-04-225: Enumerated item is supported/enforced: Batch authorization compares `ProposedWorkPacketPayload.id`, `parent_plan_id`, `plan_slice_id`, `scope.allowed_globs`, and `runtime_baseline_ref`, plus the proposed packet snapshot hash/revision and authorization review fields, to the created WorkPacket and captured authorization record.
+- [ ] AC-04-226: Table row is implemented: Gate: Runtime baseline acceptance; Snapshot producer: `baseline.review`; Snapshot category: ephemeral; Decision action: `baseline.accept`
+- [ ] AC-04-227: Table row is implemented: Gate: AC approval; Snapshot producer: `work.ac.review`; Snapshot category: ephemeral; Decision action: `work.ac.approve`
+- [ ] AC-04-228: Table row is implemented: Gate: Work Packet approval; Snapshot producer: `work.packet.review`; Snapshot category: ephemeral; Decision action: `work.approve`
+- [ ] AC-04-229: Table row is implemented: Gate: Implementation authorization; Snapshot producer: `work.authorization.review`; Snapshot category: ephemeral; Decision action: `work.authorize`
+- [ ] AC-04-230: Table row is implemented: Gate: Plan approval; Snapshot producer: `plan.propose`; Snapshot category: ephemeral; Decision action: `plan.approve`
+- [ ] AC-04-231: Table row is implemented: Gate: Plan batch proceed; Snapshot producer: `plan.batch_snapshot.create`; Snapshot category: persisted batch audit record; Decision action: `plan.batch_proceed`
+- [ ] AC-04-232: Table row is implemented: Producer: `baseline.review`; Snapshot payload schema: `BaselineReviewSnapshotPayload`: `/stack`, `/commands`, `/configuration`, `/dependency_modes`, `/diff_policy`, `/validation`; Source artifact refs: canonical ref `{ "artifact_type": "runtime_baseline", "id": null, "revision": baseline.revision }`
+- [ ] AC-04-233: Table row is implemented: Producer: `work.ac.review`; Snapshot payload schema: `AcReviewSnapshotPayload`: work id, work revision when present, reviewed AC payload; Source artifact refs: WorkPacket ref when a WorkPacket exists, plus canonical SourceArtifactRefs declared by source-derived AC SourceEvidence in the reviewed payload
+- [ ] AC-04-234: Table row is implemented: Producer: `work.packet.review`; Snapshot payload schema: `WorkPacketReviewSnapshotPayload`: work id/revision, title, parent_plan_id, plan_slice_id, intent, acceptance_criteria, docs policy/none_required_reason/not_applicable_reason, allowed_globs, platform, architecture, classification, runtime_baseline_ref; Source artifact refs: WorkPacket ref, referenced runtime baseline artifact ref, and canonical SourceArtifactRefs declared by source-derived AC SourceEvidence
+- [ ] AC-04-235: Table row is implemented: Producer: `work.authorization.review`; Snapshot payload schema: `AuthorizationReviewSnapshotPayload`; Source artifact refs: WorkPacket ref, referenced runtime baseline artifact ref, and SourceArtifactRefs already present in the approved packet review surface
+- [ ] AC-04-236: Table row is implemented: Producer: `plan.propose`; Snapshot payload schema: `PlanProposalPayload`; Source artifact refs: Source refs declared in the PlanProposalPayload, plus source WorkPacket ref when `PlanProposalPayload.source_work_id` is non-null
+- [ ] AC-04-237: Table row is implemented: Producer: `plan.batch_snapshot.create`; Snapshot payload schema: `BatchReviewSnapshotPayload`; Source artifact refs: refs derived by section 11.4
+- [ ] AC-04-238: Table row is implemented: Decision type: `runtime_baseline_acceptance`; Approved-field root payload: RuntimeBaseline artifact; Approved JSON pointer set: `/stack`, `/commands`, `/configuration`, `/dependency_modes`, `/diff_policy`, `/validation`
+- [ ] AC-04-239: Table row is implemented: Decision type: `plan_vs_single`; Approved-field root payload: PlanVsSingleDecisionPayload stored in HumanDecision.approved_payload; Approved JSON pointer set: `/work_id`, `/selected_option`, `/presented_ac_payload`, `/presented_ac_payload_hash`, `/presented_ac_refs`
+- [ ] AC-04-240: Table row is implemented: Decision type: `platform_choice`; Approved-field root payload: PlatformChoiceDecisionPayload stored in HumanDecision.approved_payload; Approved JSON pointer set: `/work_id`, `/choice`, `/custom_response`
+- [ ] AC-04-241: Table row is implemented: Decision type: `architecture_choice`; Approved-field root payload: ArchitectureChoiceDecisionPayload stored in HumanDecision.approved_payload; Approved JSON pointer set: `/work_id`, `/choice`, `/custom_response`, `/option_details`
+- [ ] AC-04-242: Table row is implemented: Decision type: `ac_approval`; Approved-field root payload: WorkPacket artifact; Approved JSON pointer set: `/acceptance_criteria`
+- [ ] AC-04-243: Table row is implemented: Decision type: `work_packet_approval`; Approved-field root payload: WorkPacket artifact; Approved JSON pointer set: `/title`, `/parent_plan_id`, `/plan_slice_id`, `/intent`, `/acceptance_criteria`, `/docs/policy`, `/docs/none_required_reason`, `/docs/not_applicable_reason`, `/scope/allowed_globs`, `/platform`, `/architecture`, `/classification`, `/runtime_baseline_ref`
+- [ ] AC-04-244: Table row is implemented: Decision type: `implementation_authorization`; Approved-field root payload: AuthorizationReviewSnapshotPayload stored in HumanDecision.approved_payload; Approved JSON pointer set: `/id`, `/approved_packet_snapshot_hash`, `/approved_packet_snapshot_revision`, `/allowed_globs`, `/runtime_baseline_ref`, `/change_baseline_capture_plan`
+- [ ] AC-04-245: Table row is implemented: Decision type: `batch_ac_approval`; Approved-field root payload: ProposedWorkPacketPayload stored through the parent BatchReviewSnapshot child payload; Approved JSON pointer set: `/acceptance_criteria`
+- [ ] AC-04-246: Table row is implemented: Decision type: `batch_work_packet_approval`; Approved-field root payload: ProposedWorkPacketPayload stored through the parent BatchReviewSnapshot child payload; Approved JSON pointer set: `/title`, `/parent_plan_id`, `/plan_slice_id`, `/intent`, `/acceptance_criteria`, `/docs/policy`, `/docs/none_required_reason`, `/docs/not_applicable_reason`, `/scope/allowed_globs`, `/platform`, `/architecture`, `/classification`, `/runtime_baseline_ref`
+- [ ] AC-04-247: Table row is implemented: Decision type: `batch_child_implementation_authorization`; Approved-field root payload: ProposedAuthorizationReviewSnapshotPayload stored in HumanDecision.approved_payload; Approved JSON pointer set: `/plan_slice_id`, `/proposed_child_id`, `/expected_created_work_packet_revision`, `/proposed_packet_snapshot_hash`, `/proposed_packet_snapshot_revision`, `/allowed_globs`, `/runtime_baseline_ref`, `/change_baseline_capture_plan`
+- [ ] AC-04-248: Table row is implemented: Decision type: `plan_approval`; Approved-field root payload: PlanProposalPayload; Approved JSON pointer set: `/title`, `/goal`, `/source_work_id`, `/product_context`, `/summary`, `/slices`
+- [ ] AC-04-249: Table row is implemented: Decision type: `plan_batch_proceed`; Approved-field root payload: BatchProceedSelectionPayload stored in BatchProceedRecord.selection; Approved JSON pointer set: `/selected_option`, `/batch_snapshot_hash`, `/batch_snapshot_revision`, `/proposed_children_payload_hash`, `/children`

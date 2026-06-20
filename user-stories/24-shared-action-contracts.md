@@ -23,8 +23,598 @@ As a API implementer, I want shared action contracts implemented, so that all in
 
 ## Acceptance criteria
 
-- [ ] Shared action result fields are returned consistently.
-- [ ] Required actions exist with the specified input/output and mutation semantics.
-- [ ] Human-gated actions enforce prompt, selected number, raw response, snapshot hash/revision, and source-ref requirements.
-- [ ] Action contracts are reusable by CLI, MCP, Pi, viewer, and generated harness integrations.
-- [ ] Invalid action inputs return structured diagnostics without illegal state mutation.
+<!-- Expanded from agentic-redesign.md to provide behavior-level coverage. -->
+
+- [ ] AC-24-001: Each action has the same input schema for CLI and MCP when both interfaces are supported.
+- [ ] AC-24-002: CLI bootstrap-only and CLI local-runtime-only actions have no MCP tool requirement.
+- [ ] AC-24-003: All `patch` inputs use RFC 6902 JSON Patch arrays with operations `add`, `replace`, and `remove` only.
+- [ ] AC-24-004: Each operation must include `op` and `path`
+- [ ] AC-24-005: `add` and `replace` must include `value`.
+- [ ] AC-24-006: Before applying a patch, Spec Guard must compute the affected paths, reject nonexistent paths for `replace`/`remove`, reject type-invalid values, and run approved-field impact detection against the exact affected path set.
+- [ ] AC-24-007: The `Mutates` column uses `yes` for governed state mutation, `no` for no mutation, and `audit_only` for persisted review/audit records that do not change governed state.
+- [ ] AC-24-008: The CLI presentation layer is the exception: successful `npx spec-guard init` without a JSON flag must render a plain-text success summary instead of printing the raw action result JSON.
+- [ ] AC-24-009: `npx spec-guard init --json` or an equivalent explicit machine-readable mode must print the standard JSON result.
+- [ ] AC-24-010: stores a CommandResult.
+- [ ] AC-24-011: It is the normal way to create command-backed governed evidence.
+- [ ] AC-24-012: When `related_runtime_baseline_ref` or `related_runtime_baseline_draft_revision` is supplied, Spec Guard must append the kernel-created CommandResult to the matching RuntimeBaseline `validation.command_results`
+- [ ] AC-24-013: callers must not submit baseline validation CommandResults through `baseline.update`.
+- [ ] AC-24-014: `skipped` CommandResults may be created only when `command.run` is asked to record a deterministic precondition skip, such as a missing optional command with a recorded not-applicable reason
+- [ ] AC-24-015: skipped results cannot satisfy required evidence gates.
+- [ ] AC-24-016: `work.docs.add` and `work.docs.update` create docs EvidenceRecords, populate `docs_content_tokens`,
+- [ ] AC-24-017: must capture `file_state_snapshot` as kernel state during the action.
+- [ ] AC-24-018: Docs, failure, pass, and runtime evidence actions must capture
+- [ ] AC-24-019: store `file_state_snapshot` as kernel state during the action.
+- [ ] AC-24-020: That snapshot is never a trusted caller input.
+- [ ] AC-24-021: Failure, pass, and runtime evidence actions must reference a kernel-created CommandResult
+- [ ] AC-24-022: must derive command, exit code, status, timestamps, and output refs from that CommandResult rather than caller-supplied facts.
+- [ ] AC-24-023: `work.split` is non-mutating analysis that returns proposed Plan or child packet suggestions
+- [ ] AC-24-024: must not create artifacts or decisions.
+- [ ] AC-24-025: `work.coverage.propose` is non-mutating analysis that returns source/coverage suggestions
+- [ ] AC-24-026: must not record approval.
+- [ ] AC-24-027: `work.docs.none` may set docs policy to `none_required` only when classification and docs rules allow it, must store the reason in `docs.none_required_reason`,
+- [ ] AC-24-028: must reject API/contract-surface and operational-document packets.
+- [ ] AC-24-029: `work.claims.validate` validates supplied claims against schemas, required evidence refs, duplicate ids, and prohibited human-intent judgment references
+- [ ] AC-24-030: it stores valid claims or diagnostics but does not mark verifier results passed.
+- [ ] AC-24-031: These actions must reject missing human confirmation:
+- [ ] AC-24-032: decision actions that record human choices.
+- [ ] AC-24-033: Human-gated actions must require
+- [ ] AC-24-034: record `selected_number`, `raw_response`, `decision_prompt`, and `human_confirmed`.
+- [ ] AC-24-035: If the caller does not supply `prompt_id`, the action must deterministically generate one as `prompt:<action_id>:<sha256_lower_hex(canonical decision_prompt)>`
+- [ ] AC-24-036: store it in the HumanDecision.
+- [ ] AC-24-037: Human-gated approval actions that bind to a review surface must also require
+- [ ] AC-24-038: record `review_snapshot_hash`, `review_snapshot_revision`, and `source_artifact_refs`, or for batch proceed `batch_snapshot_hash` and `batch_snapshot_revision` with `source_artifact_refs` copied from the persisted BatchReviewSnapshot.
+- [ ] AC-24-039: `work.plan_choice.answer` must record decision type `plan_vs_single` only for selected option 1 or 2
+- [ ] AC-24-040: option 3 Discuss creates no HumanDecision.
+- [ ] AC-24-041: `work.choice.answer` and `work.choice.confirm_custom` must record registered HumanDecision types for platform and architecture only when the selected option is a final confirmed platform or architecture choice.
+- [ ] AC-24-042: Discuss and unconfirmed custom prose must create no HumanDecision.
+- [ ] AC-24-043: `plan.batch_proceed` must store the canonical BatchProceedSelectionPayload and BatchProceedResult in a BatchProceedRecord on the Plan only for selected options 1 through 4
+- [ ] AC-24-044: option 5 Discuss creates no HumanDecision and no BatchProceedRecord.
+- [ ] AC-24-045: Generic `decision.create` and `decision.supersede` must not be used for standard workflow gate or choice decision types that have side effects: runtime baseline acceptance, Plan-vs-single, platform choice, architecture choice, AC approval, Work Packet approval, implementation authorization, Plan approval, and Plan batch proceed.
+- [ ] AC-24-046: Those decisions must use their specialized actions so required artifact writes, baseline capture, child creation, approvals, and authorizations occur atomically.
+- [ ] AC-24-047: Generic decision actions are allowed only for non-review-bound decisions or custom/unregistered decision types whose effects are limited to recording the decision.
+- [ ] AC-24-048: For any registered decision type whose approved-field root is `HumanDecision.approved_payload`, specialized decision actions must require enough input to construct
+- [ ] AC-24-049: validate the canonical `approved_payload` when the selected option records a final approving/selecting decision.
+- [ ] AC-24-050: Decline, block, and Discuss paths must not require `approved_payload`.
+- [ ] AC-24-051: Standard actions derive `approved_fields` from decision type.
+- [ ] AC-24-052: Custom decision actions must record explicit approved fields or use a registered decision type.
+- [ ] AC-24-053: Generic update actions must validate approved-field impact.
+- [ ] AC-24-054: `work.update` must reject protected approved-field mutations or apply the mutation with deterministic invalidation of every dependent approval/authorization listed in the action result.
+- [ ] AC-24-055: `plan.update` must reject Plan-approved-field mutations unless a registered Plan amendment action exists
+- [ ] AC-24-056: it must not silently invalidate Plan approval into an undefined non-approved state.
+- [ ] AC-24-057: `work.evidence.not_applicable` must reject deterministic ineligibility.
+- [ ] AC-24-058: Human confirmation may acknowledge an eligible not-applicable determination, but must not create eligibility.
+- [ ] AC-24-059: Enumerated item is supported/enforced: `baseline.accept`,
+- [ ] AC-24-060: Enumerated item is supported/enforced: `work.plan_choice.answer`,
+- [ ] AC-24-061: Enumerated item is supported/enforced: `work.choice.answer`,
+- [ ] AC-24-062: Enumerated item is supported/enforced: `work.choice.confirm_custom`,
+- [ ] AC-24-063: Enumerated item is supported/enforced: `work.ac.approve`,
+- [ ] AC-24-064: Enumerated item is supported/enforced: `work.approve`,
+- [ ] AC-24-065: Enumerated item is supported/enforced: `work.authorize`,
+- [ ] AC-24-066: Enumerated item is supported/enforced: `plan.approve`,
+- [ ] AC-24-067: Enumerated item is supported/enforced: `plan.batch_proceed`,
+- [ ] AC-24-068: Enumerated item is supported/enforced: decision actions that record human choices.
+- [ ] AC-24-069: Action `init` has a shared action contract.
+- [ ] AC-24-070: Action `init` has no MCP tool and is CLI-only when the spec marks it CLI-only.
+- [ ] AC-24-071: Action `init` has mutation mode `yes`.
+- [ ] AC-24-072: Action `init` has no required inputs.
+- [ ] AC-24-073: Action `init` accepts optional input `project id`.
+- [ ] AC-24-074: Action `init` accepts optional input `artifact root`.
+- [ ] AC-24-075: Action `init` accepts optional input `json output flag`.
+- [ ] AC-24-076: Action `config.get` has a shared action contract.
+- [ ] AC-24-077: Action `config.get` is exposed as MCP tool `spec_guard_config_get`.
+- [ ] AC-24-078: Action `config.get` has mutation mode `no`.
+- [ ] AC-24-079: Action `config.get` has no required inputs.
+- [ ] AC-24-080: Action `config.get` accepts optional input `include_full`.
+- [ ] AC-24-081: Action `config.update` has a shared action contract.
+- [ ] AC-24-082: Action `config.update` is exposed as MCP tool `spec_guard_config_update`.
+- [ ] AC-24-083: Action `config.update` has mutation mode `yes`.
+- [ ] AC-24-084: Action `config.update` requires input `patch`.
+- [ ] AC-24-085: Action `config.update` accepts optional input `confirm unsafe host`.
+- [ ] AC-24-086: Action `config.check` has a shared action contract.
+- [ ] AC-24-087: Action `config.check` is exposed as MCP tool `spec_guard_config_check`.
+- [ ] AC-24-088: Action `config.check` has mutation mode `no`.
+- [ ] AC-24-089: Action `config.check` has no required inputs.
+- [ ] AC-24-090: Action `config.check` has no optional inputs.
+- [ ] AC-24-091: Action `verifier.config.get` has a shared action contract.
+- [ ] AC-24-092: Action `verifier.config.get` is exposed as MCP tool `spec_guard_verifier_config_get`.
+- [ ] AC-24-093: Action `verifier.config.get` has mutation mode `no`.
+- [ ] AC-24-094: Action `verifier.config.get` has no required inputs.
+- [ ] AC-24-095: Action `verifier.config.get` has no optional inputs.
+- [ ] AC-24-096: Action `verifier.config.update` has a shared action contract.
+- [ ] AC-24-097: Action `verifier.config.update` is exposed as MCP tool `spec_guard_verifier_config_update`.
+- [ ] AC-24-098: Action `verifier.config.update` has mutation mode `yes`.
+- [ ] AC-24-099: Action `verifier.config.update` requires input `VerifierConfigUpdateInput`.
+- [ ] AC-24-100: Action `verifier.config.update` accepts optional input `human confirmation fields`.
+- [ ] AC-24-101: Action `verifier.health_check` has a shared action contract.
+- [ ] AC-24-102: Action `verifier.health_check` is exposed as MCP tool `spec_guard_verifier_health_check`.
+- [ ] AC-24-103: Action `verifier.health_check` has mutation mode `yes`.
+- [ ] AC-24-104: Action `verifier.health_check` has no required inputs.
+- [ ] AC-24-105: Action `verifier.health_check` accepts optional input `include_full`.
+- [ ] AC-24-106: Action `baseline.init` has a shared action contract.
+- [ ] AC-24-107: Action `baseline.init` is exposed as MCP tool `spec_guard_baseline_init`.
+- [ ] AC-24-108: Action `baseline.init` has mutation mode `yes`.
+- [ ] AC-24-109: Action `baseline.init` has no required inputs.
+- [ ] AC-24-110: Action `baseline.init` accepts optional input `draft baseline fields`.
+- [ ] AC-24-111: Action `baseline.update` has a shared action contract.
+- [ ] AC-24-112: Action `baseline.update` is exposed as MCP tool `spec_guard_baseline_update`.
+- [ ] AC-24-113: Action `baseline.update` has mutation mode `yes`.
+- [ ] AC-24-114: Action `baseline.update` requires input `patch`.
+- [ ] AC-24-115: Action `baseline.update` accepts optional input `source work id`.
+- [ ] AC-24-116: Action `baseline.update` accepts optional input `human runtime confirmation`.
+- [ ] AC-24-117: Action `baseline.review` has a shared action contract.
+- [ ] AC-24-118: Action `baseline.review` is exposed as MCP tool `spec_guard_baseline_review`.
+- [ ] AC-24-119: Action `baseline.review` has mutation mode `no`.
+- [ ] AC-24-120: Action `baseline.review` has no required inputs.
+- [ ] AC-24-121: Action `baseline.review` accepts optional input `include_full`.
+- [ ] AC-24-122: Action `baseline.accept` has a shared action contract.
+- [ ] AC-24-123: Action `baseline.accept` is exposed as MCP tool `spec_guard_baseline_accept`.
+- [ ] AC-24-124: Action `baseline.accept` has mutation mode `yes`.
+- [ ] AC-24-125: Action `baseline.accept` requires input `selected_number`.
+- [ ] AC-24-126: Action `baseline.accept` requires input `raw_response`.
+- [ ] AC-24-127: Action `baseline.accept` requires input `decision_prompt`.
+- [ ] AC-24-128: Action `baseline.accept` requires input `human_confirmed`.
+- [ ] AC-24-129: Action `baseline.accept` requires input `review_snapshot_hash`.
+- [ ] AC-24-130: Action `baseline.accept` requires input `review_snapshot_revision`.
+- [ ] AC-24-131: Action `baseline.accept` requires input `source_artifact_refs`.
+- [ ] AC-24-132: Action `baseline.accept` accepts optional input `actor`.
+- [ ] AC-24-133: Action `baseline.block` has a shared action contract.
+- [ ] AC-24-134: Action `baseline.block` is exposed as MCP tool `spec_guard_baseline_block`.
+- [ ] AC-24-135: Action `baseline.block` has mutation mode `yes`.
+- [ ] AC-24-136: Action `baseline.block` requires input `reason`.
+- [ ] AC-24-137: Action `baseline.block` accepts optional input `owner`.
+- [ ] AC-24-138: Action `baseline.block` accepts optional input `next_action`.
+- [ ] AC-24-139: Action `baseline.check` has a shared action contract.
+- [ ] AC-24-140: Action `baseline.check` is exposed as MCP tool `spec_guard_baseline_check`.
+- [ ] AC-24-141: Action `baseline.check` has mutation mode `no`.
+- [ ] AC-24-142: Action `baseline.check` has no required inputs.
+- [ ] AC-24-143: Action `baseline.check` accepts optional input `include_full`.
+- [ ] AC-24-144: Action `source_artifact.register` has a shared action contract.
+- [ ] AC-24-145: Action `source_artifact.register` is exposed as MCP tool `spec_guard_source_artifact_register`.
+- [ ] AC-24-146: Action `source_artifact.register` has mutation mode `yes`.
+- [ ] AC-24-147: Action `source_artifact.register` requires input `SourceArtifactRegisterInput`.
+- [ ] AC-24-148: Action `source_artifact.register` has no optional inputs.
+- [ ] AC-24-149: Action `source_artifact.get` has a shared action contract.
+- [ ] AC-24-150: Action `source_artifact.get` is exposed as MCP tool `spec_guard_source_artifact_get`.
+- [ ] AC-24-151: Action `source_artifact.get` has mutation mode `no`.
+- [ ] AC-24-152: Action `source_artifact.get` requires input `id`.
+- [ ] AC-24-153: Action `source_artifact.get` accepts optional input `revision`.
+- [ ] AC-24-154: Action `source_artifact.get` accepts optional input `include_full`.
+- [ ] AC-24-155: Action `source_artifact.list` has a shared action contract.
+- [ ] AC-24-156: Action `source_artifact.list` is exposed as MCP tool `spec_guard_source_artifact_list`.
+- [ ] AC-24-157: Action `source_artifact.list` has mutation mode `no`.
+- [ ] AC-24-158: Action `source_artifact.list` has no required inputs.
+- [ ] AC-24-159: Action `source_artifact.list` accepts optional input `filters`.
+- [ ] AC-24-160: Action `source_artifact.update` has a shared action contract.
+- [ ] AC-24-161: Action `source_artifact.update` is exposed as MCP tool `spec_guard_source_artifact_update`.
+- [ ] AC-24-162: Action `source_artifact.update` has mutation mode `yes`.
+- [ ] AC-24-163: Action `source_artifact.update` requires input `SourceArtifactUpdateInput`.
+- [ ] AC-24-164: Action `source_artifact.update` has no optional inputs.
+- [ ] AC-24-165: Action `plan.propose` has a shared action contract.
+- [ ] AC-24-166: Action `plan.propose` is exposed as MCP tool `spec_guard_plan_propose`.
+- [ ] AC-24-167: Action `plan.propose` has mutation mode `no`.
+- [ ] AC-24-168: Action `plan.propose` requires input `plan_proposal_payload`.
+- [ ] AC-24-169: Action `plan.propose` accepts optional input `source_work_id`.
+- [ ] AC-24-170: Action `plan.propose` accepts optional input `include_full`.
+- [ ] AC-24-171: Action `plan.approve` has a shared action contract.
+- [ ] AC-24-172: Action `plan.approve` is exposed as MCP tool `spec_guard_plan_approve`.
+- [ ] AC-24-173: Action `plan.approve` has mutation mode `yes`.
+- [ ] AC-24-174: Action `plan.approve` requires input `plan_proposal_payload`.
+- [ ] AC-24-175: Action `plan.approve` requires input `selected_number`.
+- [ ] AC-24-176: Action `plan.approve` requires input `raw_response`.
+- [ ] AC-24-177: Action `plan.approve` requires input `decision_prompt`.
+- [ ] AC-24-178: Action `plan.approve` requires input `human_confirmed`.
+- [ ] AC-24-179: Action `plan.approve` requires input `review_snapshot_hash`.
+- [ ] AC-24-180: Action `plan.approve` requires input `review_snapshot_revision`.
+- [ ] AC-24-181: Action `plan.approve` requires input `source_artifact_refs`.
+- [ ] AC-24-182: Action `plan.approve` accepts optional input `source_work_id`.
+- [ ] AC-24-183: Action `plan.approve` accepts optional input `plan id`.
+- [ ] AC-24-184: Action `plan.batch_snapshot.create` has a shared action contract.
+- [ ] AC-24-185: Action `plan.batch_snapshot.create` is exposed as MCP tool `spec_guard_plan_batch_snapshot_create`.
+- [ ] AC-24-186: Action `plan.batch_snapshot.create` has mutation mode `audit_only`.
+- [ ] AC-24-187: Action `plan.batch_snapshot.create` requires input `plan_id`.
+- [ ] AC-24-188: Action `plan.batch_snapshot.create` requires input `proposed_children_payload`.
+- [ ] AC-24-189: Action `plan.batch_snapshot.create` accepts optional input `include_full`.
+- [ ] AC-24-190: Action `plan.batch_proceed` has a shared action contract.
+- [ ] AC-24-191: Action `plan.batch_proceed` is exposed as MCP tool `spec_guard_plan_batch_proceed`.
+- [ ] AC-24-192: Action `plan.batch_proceed` has mutation mode `yes`.
+- [ ] AC-24-193: Action `plan.batch_proceed` requires input `plan_id`.
+- [ ] AC-24-194: Action `plan.batch_proceed` requires input `batch_snapshot_hash`.
+- [ ] AC-24-195: Action `plan.batch_proceed` requires input `batch_snapshot_revision`.
+- [ ] AC-24-196: Action `plan.batch_proceed` requires input `selected_number`.
+- [ ] AC-24-197: Action `plan.batch_proceed` requires input `raw_response`.
+- [ ] AC-24-198: Action `plan.batch_proceed` requires input `decision_prompt`.
+- [ ] AC-24-199: Action `plan.batch_proceed` requires input `human_confirmed`.
+- [ ] AC-24-200: Action `plan.batch_proceed` has no optional inputs.
+- [ ] AC-24-201: Action `plan.child.create` has a shared action contract.
+- [ ] AC-24-202: Action `plan.child.create` is exposed as MCP tool `spec_guard_plan_child_create`.
+- [ ] AC-24-203: Action `plan.child.create` has mutation mode `yes`.
+- [ ] AC-24-204: Action `plan.child.create` requires input `plan_id`.
+- [ ] AC-24-205: Action `plan.child.create` requires input `plan_proposal_hash`.
+- [ ] AC-24-206: Action `plan.child.create` requires input `plan_proposal_snapshot_revision`.
+- [ ] AC-24-207: Action `plan.child.create` requires input `plan_slice_id`.
+- [ ] AC-24-208: Action `plan.child.create` requires input `proposed_work_payload`.
+- [ ] AC-24-209: Action `plan.child.create` has no optional inputs.
+- [ ] AC-24-210: Action `plan.list` has a shared action contract.
+- [ ] AC-24-211: Action `plan.list` is exposed as MCP tool `spec_guard_plan_list`.
+- [ ] AC-24-212: Action `plan.list` has mutation mode `no`.
+- [ ] AC-24-213: Action `plan.list` has no required inputs.
+- [ ] AC-24-214: Action `plan.list` accepts optional input `include archived`.
+- [ ] AC-24-215: Action `plan.get` has a shared action contract.
+- [ ] AC-24-216: Action `plan.get` is exposed as MCP tool `spec_guard_plan_get`.
+- [ ] AC-24-217: Action `plan.get` has mutation mode `no`.
+- [ ] AC-24-218: Action `plan.get` requires input `id`.
+- [ ] AC-24-219: Action `plan.get` accepts optional input `include_full`.
+- [ ] AC-24-220: Action `plan.update` has a shared action contract.
+- [ ] AC-24-221: Action `plan.update` is exposed as MCP tool `spec_guard_plan_update`.
+- [ ] AC-24-222: Action `plan.update` has mutation mode `yes`.
+- [ ] AC-24-223: Action `plan.update` requires input `id`.
+- [ ] AC-24-224: Action `plan.update` requires input `patch`.
+- [ ] AC-24-225: Action `plan.update` has no optional inputs.
+- [ ] AC-24-226: Action `plan.archive` has a shared action contract.
+- [ ] AC-24-227: Action `plan.archive` is exposed as MCP tool `spec_guard_plan_archive`.
+- [ ] AC-24-228: Action `plan.archive` has mutation mode `yes`.
+- [ ] AC-24-229: Action `plan.archive` requires input `id`.
+- [ ] AC-24-230: Action `plan.archive` accepts optional input `reason`.
+- [ ] AC-24-231: Action `decision.create` has a shared action contract.
+- [ ] AC-24-232: Action `decision.create` is exposed as MCP tool `spec_guard_decision_create`.
+- [ ] AC-24-233: Action `decision.create` has mutation mode `yes`.
+- [ ] AC-24-234: Action `decision.create` requires input `decision_type`.
+- [ ] AC-24-235: Action `decision.create` requires input `decision_prompt`.
+- [ ] AC-24-236: Action `decision.create` requires input `selected_number`.
+- [ ] AC-24-237: Action `decision.create` requires input `raw_response`.
+- [ ] AC-24-238: Action `decision.create` requires input `human_confirmed`.
+- [ ] AC-24-239: Action `decision.create` accepts optional input `custom_response`.
+- [ ] AC-24-240: Action `decision.create` accepts optional input `approved_payload`.
+- [ ] AC-24-241: Action `decision.create` accepts optional input `reviewed_payload`.
+- [ ] AC-24-242: Action `decision.create` accepts optional input `review_snapshot_hash`.
+- [ ] AC-24-243: Action `decision.create` accepts optional input `review_snapshot_revision`.
+- [ ] AC-24-244: Action `decision.create` accepts optional input `source_artifact_refs`.
+- [ ] AC-24-245: Action `decision.create` accepts optional input `approved_fields required for custom/unregistered decision types`.
+- [ ] AC-24-246: Action `decision.list` has a shared action contract.
+- [ ] AC-24-247: Action `decision.list` is exposed as MCP tool `spec_guard_decision_list`.
+- [ ] AC-24-248: Action `decision.list` has mutation mode `no`.
+- [ ] AC-24-249: Action `decision.list` has no required inputs.
+- [ ] AC-24-250: Action `decision.list` accepts optional input `filters`.
+- [ ] AC-24-251: Action `decision.get` has a shared action contract.
+- [ ] AC-24-252: Action `decision.get` is exposed as MCP tool `spec_guard_decision_get`.
+- [ ] AC-24-253: Action `decision.get` has mutation mode `no`.
+- [ ] AC-24-254: Action `decision.get` requires input `id`.
+- [ ] AC-24-255: Action `decision.get` accepts optional input `include_full`.
+- [ ] AC-24-256: Action `decision.supersede` has a shared action contract.
+- [ ] AC-24-257: Action `decision.supersede` is exposed as MCP tool `spec_guard_decision_supersede`.
+- [ ] AC-24-258: Action `decision.supersede` has mutation mode `yes`.
+- [ ] AC-24-259: Action `decision.supersede` requires input `prior_decision_id`.
+- [ ] AC-24-260: Action `decision.supersede` requires input `decision_type`.
+- [ ] AC-24-261: Action `decision.supersede` requires input `decision_prompt`.
+- [ ] AC-24-262: Action `decision.supersede` requires input `selected_number`.
+- [ ] AC-24-263: Action `decision.supersede` requires input `raw_response`.
+- [ ] AC-24-264: Action `decision.supersede` requires input `human_confirmed`.
+- [ ] AC-24-265: Action `decision.supersede` accepts optional input `custom_response`.
+- [ ] AC-24-266: Action `decision.supersede` accepts optional input `approved_payload`.
+- [ ] AC-24-267: Action `decision.supersede` accepts optional input `reviewed_payload`.
+- [ ] AC-24-268: Action `decision.supersede` accepts optional input `review_snapshot_hash`.
+- [ ] AC-24-269: Action `decision.supersede` accepts optional input `review_snapshot_revision`.
+- [ ] AC-24-270: Action `decision.supersede` accepts optional input `source_artifact_refs`.
+- [ ] AC-24-271: Action `decision.supersede` accepts optional input `approved_fields for custom/unregistered decision types`.
+- [ ] AC-24-272: Action `decision.archive_metadata` has a shared action contract.
+- [ ] AC-24-273: Action `decision.archive_metadata` is exposed as MCP tool `spec_guard_decision_archive_metadata`.
+- [ ] AC-24-274: Action `decision.archive_metadata` has mutation mode `yes`.
+- [ ] AC-24-275: Action `decision.archive_metadata` requires input `id`.
+- [ ] AC-24-276: Action `decision.archive_metadata` requires input `reason`.
+- [ ] AC-24-277: Action `decision.archive_metadata` has no optional inputs.
+- [ ] AC-24-278: Action `review_snapshot.persist` has a shared action contract.
+- [ ] AC-24-279: Action `review_snapshot.persist` is exposed as MCP tool `spec_guard_review_snapshot_persist`.
+- [ ] AC-24-280: Action `review_snapshot.persist` has mutation mode `audit_only`.
+- [ ] AC-24-281: Action `review_snapshot.persist` requires input `producer_action_id`.
+- [ ] AC-24-282: Action `review_snapshot.persist` requires input `source_snapshot_hash`.
+- [ ] AC-24-283: Action `review_snapshot.persist` requires input `source_snapshot_revision`.
+- [ ] AC-24-284: Action `review_snapshot.persist` requires input `source_artifact_refs`.
+- [ ] AC-24-285: Action `review_snapshot.persist` requires input `payload`.
+- [ ] AC-24-286: Action `review_snapshot.persist` accepts optional input `rendered_summary`.
+- [ ] AC-24-287: Action `work.intake` has a shared action contract.
+- [ ] AC-24-288: Action `work.intake` is exposed as MCP tool `spec_guard_work_intake`.
+- [ ] AC-24-289: Action `work.intake` has mutation mode `yes`.
+- [ ] AC-24-290: Action `work.intake` requires input `request`.
+- [ ] AC-24-291: Action `work.intake` requires input `classification`.
+- [ ] AC-24-292: Action `work.intake` accepts optional input `id`.
+- [ ] AC-24-293: Action `work.intent.draft` has a shared action contract.
+- [ ] AC-24-294: Action `work.intent.draft` is exposed as MCP tool `spec_guard_work_intent_draft`.
+- [ ] AC-24-295: Action `work.intent.draft` has mutation mode `yes`.
+- [ ] AC-24-296: Action `work.intent.draft` requires input `work id`.
+- [ ] AC-24-297: Action `work.intent.draft` requires input `WorkIntentDraftInput`.
+- [ ] AC-24-298: Action `work.intent.draft` has no optional inputs.
+- [ ] AC-24-299: Action `work.list` has a shared action contract.
+- [ ] AC-24-300: Action `work.list` is exposed as MCP tool `spec_guard_work_list`.
+- [ ] AC-24-301: Action `work.list` has mutation mode `no`.
+- [ ] AC-24-302: Action `work.list` has no required inputs.
+- [ ] AC-24-303: Action `work.list` accepts optional input `filters`.
+- [ ] AC-24-304: Action `work.get` has a shared action contract.
+- [ ] AC-24-305: Action `work.get` is exposed as MCP tool `spec_guard_work_get`.
+- [ ] AC-24-306: Action `work.get` has mutation mode `no`.
+- [ ] AC-24-307: Action `work.get` requires input `id`.
+- [ ] AC-24-308: Action `work.get` accepts optional input `include_full`.
+- [ ] AC-24-309: Action `work.update` has a shared action contract.
+- [ ] AC-24-310: Action `work.update` is exposed as MCP tool `spec_guard_work_update`.
+- [ ] AC-24-311: Action `work.update` has mutation mode `yes`.
+- [ ] AC-24-312: Action `work.update` requires input `id`.
+- [ ] AC-24-313: Action `work.update` requires input `patch`.
+- [ ] AC-24-314: Action `work.update` has no optional inputs.
+- [ ] AC-24-315: Action `work.check` has a shared action contract.
+- [ ] AC-24-316: Action `work.check` is exposed as MCP tool `spec_guard_work_check`.
+- [ ] AC-24-317: Action `work.check` has mutation mode `no`.
+- [ ] AC-24-318: Action `work.check` requires input `id`.
+- [ ] AC-24-319: Action `work.check` accepts optional input `gate`.
+- [ ] AC-24-320: Action `work.next` has a shared action contract.
+- [ ] AC-24-321: Action `work.next` is exposed as MCP tool `spec_guard_work_next`.
+- [ ] AC-24-322: Action `work.next` has mutation mode `no`.
+- [ ] AC-24-323: Action `work.next` requires input `id`.
+- [ ] AC-24-324: Action `work.next` accepts optional input `include_full`.
+- [ ] AC-24-325: Action `work.plan_choice.answer` has a shared action contract.
+- [ ] AC-24-326: Action `work.plan_choice.answer` is exposed as MCP tool `spec_guard_work_plan_choice_answer`.
+- [ ] AC-24-327: Action `work.plan_choice.answer` has mutation mode `yes`.
+- [ ] AC-24-328: Action `work.plan_choice.answer` requires input `id`.
+- [ ] AC-24-329: Action `work.plan_choice.answer` requires input `selected_number`.
+- [ ] AC-24-330: Action `work.plan_choice.answer` requires input `raw_response`.
+- [ ] AC-24-331: Action `work.plan_choice.answer` requires input `decision_prompt`.
+- [ ] AC-24-332: Action `work.plan_choice.answer` requires input `human_confirmed`.
+- [ ] AC-24-333: Action `work.plan_choice.answer` requires input `presented_ac_payload`.
+- [ ] AC-24-334: Action `work.plan_choice.answer` requires input `presented_ac_payload_hash`.
+- [ ] AC-24-335: Action `work.plan_choice.answer` accepts optional input `presented_ac_refs`.
+- [ ] AC-24-336: Action `work.choice.propose` has a shared action contract.
+- [ ] AC-24-337: Action `work.choice.propose` is exposed as MCP tool `spec_guard_work_choice_propose`.
+- [ ] AC-24-338: Action `work.choice.propose` has mutation mode `audit_only`.
+- [ ] AC-24-339: Action `work.choice.propose` requires input `id`.
+- [ ] AC-24-340: Action `work.choice.propose` requires input `choice_type`.
+- [ ] AC-24-341: Action `work.choice.propose` requires input `prompt`.
+- [ ] AC-24-342: Action `work.choice.propose` requires input `ChoicePromptOption[]`.
+- [ ] AC-24-343: Action `work.choice.propose` has no optional inputs.
+- [ ] AC-24-344: Action `work.choice.answer` has a shared action contract.
+- [ ] AC-24-345: Action `work.choice.answer` is exposed as MCP tool `spec_guard_work_choice_answer`.
+- [ ] AC-24-346: Action `work.choice.answer` has mutation mode `yes`.
+- [ ] AC-24-347: Action `work.choice.answer` requires input `id`.
+- [ ] AC-24-348: Action `work.choice.answer` requires input `choice_id`.
+- [ ] AC-24-349: Action `work.choice.answer` requires input `selected_number`.
+- [ ] AC-24-350: Action `work.choice.answer` requires input `raw_response`.
+- [ ] AC-24-351: Action `work.choice.answer` requires input `decision_prompt`.
+- [ ] AC-24-352: Action `work.choice.answer` requires input `human_confirmed`.
+- [ ] AC-24-353: Action `work.choice.answer` has no optional inputs.
+- [ ] AC-24-354: Action `work.choice.confirm_custom` has a shared action contract.
+- [ ] AC-24-355: Action `work.choice.confirm_custom` is exposed as MCP tool `spec_guard_work_choice_confirm_custom`.
+- [ ] AC-24-356: Action `work.choice.confirm_custom` has mutation mode `yes`.
+- [ ] AC-24-357: Action `work.choice.confirm_custom` requires input `id`.
+- [ ] AC-24-358: Action `work.choice.confirm_custom` requires input `choice_id`.
+- [ ] AC-24-359: Action `work.choice.confirm_custom` requires input `selected_number`.
+- [ ] AC-24-360: Action `work.choice.confirm_custom` requires input `raw_response`.
+- [ ] AC-24-361: Action `work.choice.confirm_custom` requires input `decision_prompt`.
+- [ ] AC-24-362: Action `work.choice.confirm_custom` requires input `human_confirmed`.
+- [ ] AC-24-363: Action `work.choice.confirm_custom` has no optional inputs.
+- [ ] AC-24-364: Action `work.ac.review` has a shared action contract.
+- [ ] AC-24-365: Action `work.ac.review` is exposed as MCP tool `spec_guard_work_ac_review`.
+- [ ] AC-24-366: Action `work.ac.review` has mutation mode `no`.
+- [ ] AC-24-367: Action `work.ac.review` requires input `id`.
+- [ ] AC-24-368: Action `work.ac.review` accepts optional input `proposed_ac_payload`.
+- [ ] AC-24-369: Action `work.ac.review` accepts optional input `include_source_evidence`.
+- [ ] AC-24-370: Action `work.ac.approve` has a shared action contract.
+- [ ] AC-24-371: Action `work.ac.approve` is exposed as MCP tool `spec_guard_work_ac_approve`.
+- [ ] AC-24-372: Action `work.ac.approve` has mutation mode `yes`.
+- [ ] AC-24-373: Action `work.ac.approve` requires input `id`.
+- [ ] AC-24-374: Action `work.ac.approve` requires input `reviewed_ac_payload`.
+- [ ] AC-24-375: Action `work.ac.approve` requires input `selected_number`.
+- [ ] AC-24-376: Action `work.ac.approve` requires input `raw_response`.
+- [ ] AC-24-377: Action `work.ac.approve` requires input `decision_prompt`.
+- [ ] AC-24-378: Action `work.ac.approve` requires input `human_confirmed`.
+- [ ] AC-24-379: Action `work.ac.approve` requires input `review_snapshot_hash`.
+- [ ] AC-24-380: Action `work.ac.approve` requires input `review_snapshot_revision`.
+- [ ] AC-24-381: Action `work.ac.approve` requires input `source_artifact_refs`.
+- [ ] AC-24-382: Action `work.ac.approve` has no optional inputs.
+- [ ] AC-24-383: Action `work.coverage.propose` has a shared action contract.
+- [ ] AC-24-384: Action `work.coverage.propose` is exposed as MCP tool `spec_guard_work_coverage_propose`.
+- [ ] AC-24-385: Action `work.coverage.propose` has mutation mode `no`.
+- [ ] AC-24-386: Action `work.coverage.propose` requires input `id`.
+- [ ] AC-24-387: Action `work.coverage.propose` accepts optional input `source refs`.
+- [ ] AC-24-388: Action `work.backend.verify` has a shared action contract.
+- [ ] AC-24-389: Action `work.backend.verify` is exposed as MCP tool `spec_guard_work_backend_verify`.
+- [ ] AC-24-390: Action `work.backend.verify` has mutation mode `yes`.
+- [ ] AC-24-391: Action `work.backend.verify` requires input `id`.
+- [ ] AC-24-392: Action `work.backend.verify` requires input `task_type`.
+- [ ] AC-24-393: Action `work.backend.verify` requires input `claim_ids`.
+- [ ] AC-24-394: Action `work.backend.verify` accepts optional input `adapter override if allowed`.
+- [ ] AC-24-395: Action `work.preimplementation.validate` has a shared action contract.
+- [ ] AC-24-396: Action `work.preimplementation.validate` is exposed as MCP tool `spec_guard_work_preimplementation_validate`.
+- [ ] AC-24-397: Action `work.preimplementation.validate` has mutation mode `yes`.
+- [ ] AC-24-398: Action `work.preimplementation.validate` requires input `id`.
+- [ ] AC-24-399: Action `work.preimplementation.validate` accepts optional input `include_full`.
+- [ ] AC-24-400: Action `work.implementation.start` has a shared action contract.
+- [ ] AC-24-401: Action `work.implementation.start` is exposed as MCP tool `spec_guard_work_implementation_start`.
+- [ ] AC-24-402: Action `work.implementation.start` has mutation mode `yes`.
+- [ ] AC-24-403: Action `work.implementation.start` requires input `id`.
+- [ ] AC-24-404: Action `work.implementation.start` has no optional inputs.
+- [ ] AC-24-405: Action `work.implementation.complete` has a shared action contract.
+- [ ] AC-24-406: Action `work.implementation.complete` is exposed as MCP tool `spec_guard_work_implementation_complete`.
+- [ ] AC-24-407: Action `work.implementation.complete` has mutation mode `yes`.
+- [ ] AC-24-408: Action `work.implementation.complete` requires input `id`.
+- [ ] AC-24-409: Action `work.implementation.complete` requires input `summary`.
+- [ ] AC-24-410: Action `work.implementation.complete` accepts optional input `implementation files`.
+- [ ] AC-24-411: Action `work.implementation.complete` accepts optional input `test files`.
+- [ ] AC-24-412: Action `work.split` has a shared action contract.
+- [ ] AC-24-413: Action `work.split` is exposed as MCP tool `spec_guard_work_split`.
+- [ ] AC-24-414: Action `work.split` has mutation mode `no`.
+- [ ] AC-24-415: Action `work.split` requires input `id`.
+- [ ] AC-24-416: Action `work.split` accepts optional input `include_full`.
+- [ ] AC-24-417: Action `work.packet.review` has a shared action contract.
+- [ ] AC-24-418: Action `work.packet.review` is exposed as MCP tool `spec_guard_work_packet_review`.
+- [ ] AC-24-419: Action `work.packet.review` has mutation mode `no`.
+- [ ] AC-24-420: Action `work.packet.review` requires input `id`.
+- [ ] AC-24-421: Action `work.packet.review` accepts optional input `include_full`.
+- [ ] AC-24-422: Action `work.approve` has a shared action contract.
+- [ ] AC-24-423: Action `work.approve` is exposed as MCP tool `spec_guard_work_approve`.
+- [ ] AC-24-424: Action `work.approve` has mutation mode `yes`.
+- [ ] AC-24-425: Action `work.approve` requires input `id`.
+- [ ] AC-24-426: Action `work.approve` requires input `selected_number`.
+- [ ] AC-24-427: Action `work.approve` requires input `raw_response`.
+- [ ] AC-24-428: Action `work.approve` requires input `decision_prompt`.
+- [ ] AC-24-429: Action `work.approve` requires input `human_confirmed`.
+- [ ] AC-24-430: Action `work.approve` requires input `review_snapshot_hash`.
+- [ ] AC-24-431: Action `work.approve` requires input `review_snapshot_revision`.
+- [ ] AC-24-432: Action `work.approve` requires input `source_artifact_refs`.
+- [ ] AC-24-433: Action `work.approve` has no optional inputs.
+- [ ] AC-24-434: Action `work.authorization.review` has a shared action contract.
+- [ ] AC-24-435: Action `work.authorization.review` is exposed as MCP tool `spec_guard_work_authorization_review`.
+- [ ] AC-24-436: Action `work.authorization.review` has mutation mode `no`.
+- [ ] AC-24-437: Action `work.authorization.review` requires input `id`.
+- [ ] AC-24-438: Action `work.authorization.review` accepts optional input `include_full`.
+- [ ] AC-24-439: Action `work.authorize` has a shared action contract.
+- [ ] AC-24-440: Action `work.authorize` is exposed as MCP tool `spec_guard_work_authorize`.
+- [ ] AC-24-441: Action `work.authorize` has mutation mode `yes`.
+- [ ] AC-24-442: Action `work.authorize` requires input `id`.
+- [ ] AC-24-443: Action `work.authorize` requires input `selected_number`.
+- [ ] AC-24-444: Action `work.authorize` requires input `raw_response`.
+- [ ] AC-24-445: Action `work.authorize` requires input `decision_prompt`.
+- [ ] AC-24-446: Action `work.authorize` requires input `human_confirmed`.
+- [ ] AC-24-447: Action `work.authorize` requires input `review_snapshot_hash`.
+- [ ] AC-24-448: Action `work.authorize` requires input `review_snapshot_revision`.
+- [ ] AC-24-449: Action `work.authorize` requires input `source_artifact_refs`.
+- [ ] AC-24-450: Action `work.authorize` has no optional inputs.
+- [ ] AC-24-451: Action `command.run` has a shared action contract.
+- [ ] AC-24-452: Action `command.run` is exposed as MCP tool `spec_guard_command_run`.
+- [ ] AC-24-453: Action `command.run` has mutation mode `yes`.
+- [ ] AC-24-454: Action `command.run` requires input `command_spec`.
+- [ ] AC-24-455: Action `command.run` requires input `purpose`.
+- [ ] AC-24-456: Action `command.run` accepts optional input `related work id`.
+- [ ] AC-24-457: Action `command.run` accepts optional input `related runtime baseline ref`.
+- [ ] AC-24-458: Action `command.run` accepts optional input `related runtime baseline draft revision`.
+- [ ] AC-24-459: Action `command.run` accepts optional input `resource_categories`.
+- [ ] AC-24-460: Action `command.run` accepts optional input `skip_reason`.
+- [ ] AC-24-461: Action `command.run` accepts optional input `skip_precondition`.
+- [ ] AC-24-462: Action `work.evidence.failure` has a shared action contract.
+- [ ] AC-24-463: Action `work.evidence.failure` is exposed as MCP tool `spec_guard_work_evidence_failure`.
+- [ ] AC-24-464: Action `work.evidence.failure` has mutation mode `yes`.
+- [ ] AC-24-465: Action `work.evidence.failure` requires input `id`.
+- [ ] AC-24-466: Action `work.evidence.failure` requires input `command_result_ref`.
+- [ ] AC-24-467: Action `work.evidence.failure` requires input `paths`.
+- [ ] AC-24-468: Action `work.evidence.failure` requires input `related_ac_ids`.
+- [ ] AC-24-469: Action `work.evidence.failure` requires input `evidence_role`.
+- [ ] AC-24-470: Action `work.evidence.failure` requires input `summary`.
+- [ ] AC-24-471: Action `work.evidence.failure` accepts optional input `related_doc_ids`.
+- [ ] AC-24-472: Action `work.evidence.failure` accepts optional input `resource_categories`.
+- [ ] AC-24-473: Action `work.evidence.pass` has a shared action contract.
+- [ ] AC-24-474: Action `work.evidence.pass` is exposed as MCP tool `spec_guard_work_evidence_pass`.
+- [ ] AC-24-475: Action `work.evidence.pass` has mutation mode `yes`.
+- [ ] AC-24-476: Action `work.evidence.pass` requires input `id`.
+- [ ] AC-24-477: Action `work.evidence.pass` requires input `command_result_ref`.
+- [ ] AC-24-478: Action `work.evidence.pass` requires input `paths`.
+- [ ] AC-24-479: Action `work.evidence.pass` requires input `related_ac_ids`.
+- [ ] AC-24-480: Action `work.evidence.pass` requires input `evidence_role`.
+- [ ] AC-24-481: Action `work.evidence.pass` requires input `summary`.
+- [ ] AC-24-482: Action `work.evidence.pass` accepts optional input `related_doc_ids`.
+- [ ] AC-24-483: Action `work.evidence.pass` accepts optional input `resource_categories`.
+- [ ] AC-24-484: Action `work.evidence.runtime` has a shared action contract.
+- [ ] AC-24-485: Action `work.evidence.runtime` is exposed as MCP tool `spec_guard_work_evidence_runtime`.
+- [ ] AC-24-486: Action `work.evidence.runtime` has mutation mode `yes`.
+- [ ] AC-24-487: Action `work.evidence.runtime` requires input `id`.
+- [ ] AC-24-488: Action `work.evidence.runtime` requires input `mode`.
+- [ ] AC-24-489: Action `work.evidence.runtime` requires input `command_result_ref`.
+- [ ] AC-24-490: Action `work.evidence.runtime` requires input `paths`.
+- [ ] AC-24-491: Action `work.evidence.runtime` requires input `related_ac_ids`.
+- [ ] AC-24-492: Action `work.evidence.runtime` requires input `summary`.
+- [ ] AC-24-493: Action `work.evidence.runtime` accepts optional input `related_doc_ids`.
+- [ ] AC-24-494: Action `work.evidence.runtime` accepts optional input `resource_categories`.
+- [ ] AC-24-495: Action `work.evidence.cleanup` has a shared action contract.
+- [ ] AC-24-496: Action `work.evidence.cleanup` is exposed as MCP tool `spec_guard_work_evidence_cleanup`.
+- [ ] AC-24-497: Action `work.evidence.cleanup` has mutation mode `yes`.
+- [ ] AC-24-498: Action `work.evidence.cleanup` requires input `id`.
+- [ ] AC-24-499: Action `work.evidence.cleanup` requires input `checked_resources`.
+- [ ] AC-24-500: Action `work.evidence.cleanup` requires input `resource_categories`.
+- [ ] AC-24-501: Action `work.evidence.cleanup` requires input `related_evidence_refs`.
+- [ ] AC-24-502: Action `work.evidence.cleanup` accepts optional input `before_command_result_refs`.
+- [ ] AC-24-503: Action `work.evidence.cleanup` accepts optional input `after_command_result_refs`.
+- [ ] AC-24-504: Action `work.evidence.cleanup` accepts optional input `remaining_cleanup_actions`.
+- [ ] AC-24-505: Action `work.evidence.cleanup` accepts optional input `caller_summary`.
+- [ ] AC-24-506: Action `work.evidence.not_applicable` has a shared action contract.
+- [ ] AC-24-507: Action `work.evidence.not_applicable` is exposed as MCP tool `spec_guard_work_evidence_not_applicable`.
+- [ ] AC-24-508: Action `work.evidence.not_applicable` has mutation mode `yes`.
+- [ ] AC-24-509: Action `work.evidence.not_applicable` requires input `id`.
+- [ ] AC-24-510: Action `work.evidence.not_applicable` requires input `evidence_type`.
+- [ ] AC-24-511: Action `work.evidence.not_applicable` requires input `reason`.
+- [ ] AC-24-512: Action `work.evidence.not_applicable` requires input `applies_to_ac_ids`.
+- [ ] AC-24-513: Action `work.evidence.not_applicable` requires input `classification_policy_context`.
+- [ ] AC-24-514: Action `work.evidence.not_applicable` accepts optional input `resource_categories for cleanup`.
+- [ ] AC-24-515: Action `work.evidence.not_applicable` accepts optional input `selected_number`.
+- [ ] AC-24-516: Action `work.evidence.not_applicable` accepts optional input `raw_response`.
+- [ ] AC-24-517: Action `work.evidence.not_applicable` accepts optional input `decision_prompt`.
+- [ ] AC-24-518: Action `work.evidence.not_applicable` accepts optional input `human_confirmed`.
+- [ ] AC-24-519: Action `work.docs.add` has a shared action contract.
+- [ ] AC-24-520: Action `work.docs.add` is exposed as MCP tool `spec_guard_work_docs_add`.
+- [ ] AC-24-521: Action `work.docs.add` has mutation mode `yes`.
+- [ ] AC-24-522: Action `work.docs.add` requires input `id`.
+- [ ] AC-24-523: Action `work.docs.add` requires input `paths`.
+- [ ] AC-24-524: Action `work.docs.add` requires input `related_ac_ids`.
+- [ ] AC-24-525: Action `work.docs.add` accepts optional input `summary`.
+- [ ] AC-24-526: Action `work.docs.add` accepts optional input `related_doc_ids`.
+- [ ] AC-24-527: Action `work.docs.update` has a shared action contract.
+- [ ] AC-24-528: Action `work.docs.update` is exposed as MCP tool `spec_guard_work_docs_update`.
+- [ ] AC-24-529: Action `work.docs.update` has mutation mode `yes`.
+- [ ] AC-24-530: Action `work.docs.update` requires input `id`.
+- [ ] AC-24-531: Action `work.docs.update` requires input `paths`.
+- [ ] AC-24-532: Action `work.docs.update` requires input `related_ac_ids`.
+- [ ] AC-24-533: Action `work.docs.update` accepts optional input `summary`.
+- [ ] AC-24-534: Action `work.docs.update` accepts optional input `related_doc_ids`.
+- [ ] AC-24-535: Action `work.docs.none` has a shared action contract.
+- [ ] AC-24-536: Action `work.docs.none` is exposed as MCP tool `spec_guard_work_docs_none`.
+- [ ] AC-24-537: Action `work.docs.none` has mutation mode `yes`.
+- [ ] AC-24-538: Action `work.docs.none` requires input `id`.
+- [ ] AC-24-539: Action `work.docs.none` requires input `reason`.
+- [ ] AC-24-540: Action `work.docs.none` accepts optional input `human decision ref`.
+- [ ] AC-24-541: Action `work.review.validate` has a shared action contract.
+- [ ] AC-24-542: Action `work.review.validate` is exposed as MCP tool `spec_guard_work_review_validate`.
+- [ ] AC-24-543: Action `work.review.validate` has mutation mode `no`.
+- [ ] AC-24-544: Action `work.review.validate` requires input `id`.
+- [ ] AC-24-545: Action `work.review.validate` accepts optional input `include_full`.
+- [ ] AC-24-546: Action `work.review.complete` has a shared action contract.
+- [ ] AC-24-547: Action `work.review.complete` is exposed as MCP tool `spec_guard_work_review_complete`.
+- [ ] AC-24-548: Action `work.review.complete` has mutation mode `yes`.
+- [ ] AC-24-549: Action `work.review.complete` requires input `id`.
+- [ ] AC-24-550: Action `work.review.complete` accepts optional input `final claim refs`.
+- [ ] AC-24-551: Action `work.claims.create` has a shared action contract.
+- [ ] AC-24-552: Action `work.claims.create` is exposed as MCP tool `spec_guard_work_claims_create`.
+- [ ] AC-24-553: Action `work.claims.create` has mutation mode `yes`.
+- [ ] AC-24-554: Action `work.claims.create` requires input `id`.
+- [ ] AC-24-555: Action `work.claims.create` requires input `Claim[]`.
+- [ ] AC-24-556: Action `work.claims.create` has no optional inputs.
+- [ ] AC-24-557: Action `work.claims.validate` has a shared action contract.
+- [ ] AC-24-558: Action `work.claims.validate` is exposed as MCP tool `spec_guard_work_claims_validate`.
+- [ ] AC-24-559: Action `work.claims.validate` has mutation mode `yes`.
+- [ ] AC-24-560: Action `work.claims.validate` requires input `id`.
+- [ ] AC-24-561: Action `work.claims.validate` requires input `Claim[]`.
+- [ ] AC-24-562: Action `work.claims.validate` has no optional inputs.
+- [ ] AC-24-563: Action `work.claims.audit` has a shared action contract.
+- [ ] AC-24-564: Action `work.claims.audit` is exposed as MCP tool `spec_guard_work_claims_audit`.
+- [ ] AC-24-565: Action `work.claims.audit` has mutation mode `no`.
+- [ ] AC-24-566: Action `work.claims.audit` requires input `id`.
+- [ ] AC-24-567: Action `work.claims.audit` accepts optional input `include_full`.
+- [ ] AC-24-568: Action `validate.active` has a shared action contract.
+- [ ] AC-24-569: Action `validate.active` is exposed as MCP tool `spec_guard_validate_active`.
+- [ ] AC-24-570: Action `validate.active` has mutation mode `no`.
+- [ ] AC-24-571: Action `validate.active` has no required inputs.
+- [ ] AC-24-572: Action `validate.active` accepts optional input `include archived`.
+- [ ] AC-24-573: Action `validate.parity` has a shared action contract.
+- [ ] AC-24-574: Action `validate.parity` is exposed as MCP tool `spec_guard_validate_parity`.
+- [ ] AC-24-575: Action `validate.parity` has mutation mode `no`.
+- [ ] AC-24-576: Action `validate.parity` has no required inputs.
+- [ ] AC-24-577: Action `validate.parity` has no optional inputs.
+- [ ] AC-24-578: Action `mcp.quickstart` has a shared action contract.
+- [ ] AC-24-579: Action `mcp.quickstart` is exposed as MCP tool `spec_guard_mcp_quickstart`.
+- [ ] AC-24-580: Action `mcp.quickstart` has mutation mode `no`.
+- [ ] AC-24-581: Action `mcp.quickstart` has no required inputs.
+- [ ] AC-24-582: Action `mcp.quickstart` accepts optional input `compact`.
+- [ ] AC-24-583: Action `mcp.status` has a shared action contract.
+- [ ] AC-24-584: Action `mcp.status` is exposed as MCP tool `spec_guard_mcp_status`.
+- [ ] AC-24-585: Action `mcp.status` has mutation mode `no`.
+- [ ] AC-24-586: Action `mcp.status` has no required inputs.
+- [ ] AC-24-587: Action `mcp.status` accepts optional input `include_full`.
+- [ ] AC-24-588: Action `serve.viewer` has a shared action contract.
+- [ ] AC-24-589: Action `serve.viewer` has no MCP tool and is CLI-only when the spec marks it CLI-only.
+- [ ] AC-24-590: Action `serve.viewer` has mutation mode `no`.
+- [ ] AC-24-591: Action `serve.viewer` requires input `host`.
+- [ ] AC-24-592: Action `serve.viewer` requires input `port`.
+- [ ] AC-24-593: Action `serve.viewer` accepts optional input `open browser`.

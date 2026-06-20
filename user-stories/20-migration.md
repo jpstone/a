@@ -24,8 +24,19 @@ As a existing project maintainer, I want migration implemented, so that existing
 
 ## Acceptance criteria
 
-- [ ] Migration reads legacy artifacts and writes redesigned schema-compatible artifacts.
-- [ ] Historical decisions/evidence are preserved or referenced.
-- [ ] Missing required redesigned fields produce diagnostics.
-- [ ] Approvals that cannot be proven against required snapshots/fields are marked stale or require renewed gates.
-- [ ] Migration results are visible through normal action results and viewer data.
+<!-- Expanded from agentic-redesign.md to provide behavior-level coverage. -->
+
+- [ ] AC-20-001: When reading existing artifacts, Spec Guard must:
+- [ ] AC-20-002: reject future writes that omit required canonical fields,
+- [ ] AC-20-003: never fabricate human decisions,
+- [ ] AC-20-004: never fabricate backend verification records,
+- [ ] AC-20-005: Migration must not create verifier records that judge human-approved content.
+- [ ] AC-20-006: Enumerated item is supported/enforced: migrate known synonymous fields into canonical fields,
+- [ ] AC-20-007: Enumerated item is supported/enforced: preserve raw legacy values where useful,
+- [ ] AC-20-008: Enumerated item is supported/enforced: reject future writes that omit required canonical fields,
+- [ ] AC-20-009: Enumerated item is supported/enforced: warn on boilerplate generated scope without silently deleting it,
+- [ ] AC-20-010: Enumerated item is supported/enforced: reconstruct parent/child links when possible,
+- [ ] AC-20-011: Enumerated item is supported/enforced: leave optional intent fields empty unless drafted,
+- [ ] AC-20-012: Enumerated item is supported/enforced: never fabricate human decisions,
+- [ ] AC-20-013: Enumerated item is supported/enforced: never fabricate backend verification records,
+- [ ] AC-20-014: Enumerated item is supported/enforced: invalidate approvals when migration changes approved semantics.

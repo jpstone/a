@@ -28,3 +28,42 @@ User stories derived from `agentic-redesign.md`. The original content with trace
 - [US-23: Normative schemas](23-normative-schemas.md) — derived from [Appendix A. Normative Schemas](../agentic-redesign-references.md#us-23-source)
 - [US-24: Shared action contracts](24-shared-action-contracts.md) — derived from [Appendix B. Shared Action Contracts](../agentic-redesign-references.md#us-24-source)
 - [US-25: Normative enums](25-normative-enums.md) — derived from [Appendix C. Enums](../agentic-redesign-references.md#us-25-source)
+
+## Coverage summary
+
+Acceptance criteria were expanded from `agentic-redesign.md` at behavior/contract level.
+
+- Total story files with expanded ACs: 26
+- Total acceptance criteria across story files: 3614
+- Canonical shared action input shapes covered in US-24: 74
+- External callable CLI/MCP/Pi surfaces covered in US-24: 218
+- Shared output envelope covered in US-24: 1 canonical envelope plus action-specific data variants
+
+### AC count by story
+
+- `00-implementation-discipline.md`: 10
+- `01-governance-objective.md`: 21
+- `02-authority-model.md`: 63
+- `03-choice-gate-prompt-semantics.md`: 51
+- `04-decision-binding-review-snapshots.md`: 248
+- `05-artifact-record-model.md`: 63
+- `06-runtime-and-change-baselines.md`: 101
+- `07-work-packet-plan-classification.md`: 155
+- `08-platform-architecture-decisions.md`: 41
+- `09-intent-ac-source-evidence.md`: 75
+- `10-single-packet-approval-authorization.md`: 75
+- `11-plan-lifecycle-batch-acceleration.md`: 147
+- `12-preimplementation-validation-boundaries.md`: 162
+- `13-backend-verifier.md`: 160
+- `14-runtime-review-final-claims.md`: 30
+- `15-cli-mcp-requirements.md`: 49
+- `16-agent-harness-configuration.md`: 60
+- `17-viewer-requirements.md`: 74
+- `18-diagnostics.md`: 121
+- `19-tests-first-plan.md`: 235
+- `20-migration.md`: 14
+- `21-non-goals.md`: 11
+- `22-success-criteria.md`: 18
+- `23-normative-schemas.md`: 947
+- `24-shared-action-contracts.md`: 593
+- `25-normative-enums.md`: 90

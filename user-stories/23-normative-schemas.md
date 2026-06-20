@@ -22,7 +22,952 @@ As a schema implementer, I want normative schemas implemented, so that implement
 
 ## Acceptance criteria
 
-- [ ] Each normative schema is implemented with required field names, types, enums, and nullability.
-- [ ] Schema validation rejects records that violate normative field contracts.
-- [ ] Implementations may add fields only when they do not weaken required behavior.
-- [ ] Schema support is sufficient for snapshot hashing, artifact refs, decisions, evidence, verifier records, batch records, and viewer data.
+<!-- Expanded from agentic-redesign.md to provide behavior-level coverage. -->
+
+- [ ] AC-23-001: The Appendix A schemas are treated as normative field contracts.
+- [ ] AC-23-002: Implementations may add fields only if the added fields do not weaken required behavior.
+- [ ] AC-23-003: Schema `Common top-level artifact fields` is implemented.
+- [ ] AC-23-004: Schema `Common top-level artifact fields` includes field `/artifact_type`.
+- [ ] AC-23-005: Schema `Common top-level artifact fields` includes field `/schema_version`.
+- [ ] AC-23-006: Schema `Common top-level artifact fields` includes field `/id`.
+- [ ] AC-23-007: Schema `Common top-level artifact fields` includes field `/revision`.
+- [ ] AC-23-008: Schema `Common top-level artifact fields` includes field `/created_at`.
+- [ ] AC-23-009: Schema `Common top-level artifact fields` includes field `/updated_at`.
+- [ ] AC-23-010: Schema `Common top-level artifact fields` includes field `/diagnostics`.
+- [ ] AC-23-011: Schema `Diagnostic` is implemented.
+- [ ] AC-23-012: Schema `Diagnostic` includes field `/code`.
+- [ ] AC-23-013: Schema `Diagnostic` includes field `/severity`.
+- [ ] AC-23-014: Schema `Diagnostic` includes field `/message`.
+- [ ] AC-23-015: Schema `Diagnostic` includes field `/field_path`.
+- [ ] AC-23-016: Schema `Diagnostic` includes field `/gate`.
+- [ ] AC-23-017: Schema `Diagnostic` includes field `/fix`.
+- [ ] AC-23-018: Schema `HumanDecision embedded record` is implemented.
+- [ ] AC-23-019: Schema `HumanDecision embedded record` includes field `/id`.
+- [ ] AC-23-020: Schema `HumanDecision embedded record` includes field `/decision_type`.
+- [ ] AC-23-021: Schema `HumanDecision embedded record` includes field `/prompt_id`.
+- [ ] AC-23-022: Schema `HumanDecision embedded record` includes field `/prompt_text`.
+- [ ] AC-23-023: Schema `HumanDecision embedded record` includes field `/raw_response`.
+- [ ] AC-23-024: Schema `HumanDecision embedded record` includes field `/selected_number`.
+- [ ] AC-23-025: Schema `HumanDecision embedded record` includes field `/normalized_decision`.
+- [ ] AC-23-026: Schema `HumanDecision embedded record` includes field `/approved_fields`.
+- [ ] AC-23-027: Schema `HumanDecision embedded record` includes field `/custom_response`.
+- [ ] AC-23-028: Schema `HumanDecision embedded record` includes field `/supersedes_decision_id`.
+- [ ] AC-23-029: Schema `HumanDecision embedded record` includes field `/superseded_by_decision_id`.
+- [ ] AC-23-030: Schema `HumanDecision embedded record` includes field `/review_snapshot_hash`.
+- [ ] AC-23-031: Schema `HumanDecision embedded record` includes field `/review_snapshot_revision`.
+- [ ] AC-23-032: Schema `HumanDecision embedded record` includes field `/source_artifact_refs`.
+- [ ] AC-23-033: Schema `HumanDecision embedded record` includes field `/approved_payload_hash`.
+- [ ] AC-23-034: Schema `HumanDecision embedded record` includes field `/approved_payload_revision`.
+- [ ] AC-23-035: Schema `HumanDecision embedded record` includes field `/approved_payload`.
+- [ ] AC-23-036: Schema `HumanDecision embedded record` includes field `/approved_payload_ref`.
+- [ ] AC-23-037: Schema `HumanDecision embedded record` includes field `/reviewed_payload_hash`.
+- [ ] AC-23-038: Schema `HumanDecision embedded record` includes field `/reviewed_payload_revision`.
+- [ ] AC-23-039: Schema `HumanDecision embedded record` includes field `/reviewed_payload`.
+- [ ] AC-23-040: Schema `HumanDecision embedded record` includes field `/target_artifact_revision`.
+- [ ] AC-23-041: Schema `HumanDecision embedded record` includes field `/parent_batch_snapshot_hash`.
+- [ ] AC-23-042: Schema `HumanDecision embedded record` includes field `/parent_batch_snapshot_revision`.
+- [ ] AC-23-043: Schema `HumanDecision embedded record` includes field `/source_interface`.
+- [ ] AC-23-044: Schema `HumanDecision embedded record` includes field `/human_confirmed`.
+- [ ] AC-23-045: Schema `HumanDecision embedded record` includes field `/at`.
+- [ ] AC-23-046: Schema `Config top-level artifact` is implemented.
+- [ ] AC-23-047: Schema `Config top-level artifact` includes field `/artifact_type`.
+- [ ] AC-23-048: Schema `Config top-level artifact` includes field `/schema_version`.
+- [ ] AC-23-049: Schema `Config top-level artifact` includes field `/revision`.
+- [ ] AC-23-050: Schema `Config top-level artifact` includes field `/created_at`.
+- [ ] AC-23-051: Schema `Config top-level artifact` includes field `/updated_at`.
+- [ ] AC-23-052: Schema `Config top-level artifact` includes field `/project_id`.
+- [ ] AC-23-053: Schema `Config top-level artifact` includes field `/artifact_root`.
+- [ ] AC-23-054: Schema `Config top-level artifact` includes field `/project_root`.
+- [ ] AC-23-055: Schema `Config top-level artifact` includes field `/command_execution`.
+- [ ] AC-23-056: Schema `Config top-level artifact` includes field `/command_execution/default_mode`.
+- [ ] AC-23-057: Schema `Config top-level artifact` includes field `/command_execution/configured_shell`.
+- [ ] AC-23-058: Schema `Config top-level artifact` includes field `/command_execution/default_timeout_ms`.
+- [ ] AC-23-059: Schema `Config top-level artifact` includes field `/command_execution/env_policy`.
+- [ ] AC-23-060: Schema `Config top-level artifact` includes field `/path_policy`.
+- [ ] AC-23-061: Schema `Config top-level artifact` includes field `/change_baseline_policy`.
+- [ ] AC-23-062: Schema `Config top-level artifact` includes field `/cleanup_observers`.
+- [ ] AC-23-063: Schema `Config top-level artifact` includes field `/diagnostics`.
+- [ ] AC-23-064: Schema `PathPolicy` is implemented.
+- [ ] AC-23-065: Schema `PathPolicy` includes field `/spec_guard_artifact_evidence`.
+- [ ] AC-23-066: Schema `PathPolicy` includes field `/docs`.
+- [ ] AC-23-067: Schema `PathPolicy` includes field `/tests`.
+- [ ] AC-23-068: Schema `PathPolicy` includes field `/implementation_source`.
+- [ ] AC-23-069: Schema `PathPolicy` includes field `/runtime_product_configuration`.
+- [ ] AC-23-070: Schema `PathPolicy` includes field `/generated_build_output`.
+- [ ] AC-23-071: Schema `PathPolicy` includes field `/docs_test_manifests`.
+- [ ] AC-23-072: Schema `PathPolicy` includes field `/ignored_paths`.
+- [ ] AC-23-073: Schema `ChangeBaselinePolicy` is implemented.
+- [ ] AC-23-074: Schema `ChangeBaselinePolicy` includes field `/mode`.
+- [ ] AC-23-075: Schema `CleanupObserver` is implemented.
+- [ ] AC-23-076: Schema `CleanupObserver` includes field `/resource_category`.
+- [ ] AC-23-077: Schema `CleanupObserver` includes field `/identity_fields`.
+- [ ] AC-23-078: Schema `CleanupObserver` includes field `/before_command_spec`.
+- [ ] AC-23-079: Schema `CleanupObserver` includes field `/after_command_spec`.
+- [ ] AC-23-080: Schema `CleanupObserver` includes field `/deterministic_capture`.
+- [ ] AC-23-081: Schema `CleanupObserver` includes field `/comparison_rule`.
+- [ ] AC-23-082: Schema `VerifierConfig top-level artifact` is implemented.
+- [ ] AC-23-083: Schema `VerifierConfig top-level artifact` includes field `/artifact_type`.
+- [ ] AC-23-084: Schema `VerifierConfig top-level artifact` includes field `/schema_version`.
+- [ ] AC-23-085: Schema `VerifierConfig top-level artifact` includes field `/revision`.
+- [ ] AC-23-086: Schema `VerifierConfig top-level artifact` includes field `/created_at`.
+- [ ] AC-23-087: Schema `VerifierConfig top-level artifact` includes field `/updated_at`.
+- [ ] AC-23-088: Schema `VerifierConfig top-level artifact` includes field `/mode`.
+- [ ] AC-23-089: Schema `VerifierConfig top-level artifact` includes field `/adapter_config`.
+- [ ] AC-23-090: Schema `VerifierConfig top-level artifact` includes field `/health`.
+- [ ] AC-23-091: Schema `VerifierConfig top-level artifact` includes field `/health/status`.
+- [ ] AC-23-092: Schema `VerifierConfig top-level artifact` includes field `/health/checked_at`.
+- [ ] AC-23-093: Schema `VerifierConfig top-level artifact` includes field `/health/diagnostics`.
+- [ ] AC-23-094: Schema `VerifierConfig top-level artifact` includes field `/diagnostics`.
+- [ ] AC-23-095: Schema `RuntimeBaseline top-level artifact` is implemented.
+- [ ] AC-23-096: Schema `RuntimeBaseline top-level artifact` includes field `/artifact_type`.
+- [ ] AC-23-097: Schema `RuntimeBaseline top-level artifact` includes field `/schema_version`.
+- [ ] AC-23-098: Schema `RuntimeBaseline top-level artifact` includes field `/revision`.
+- [ ] AC-23-099: Schema `RuntimeBaseline top-level artifact` includes field `/created_at`.
+- [ ] AC-23-100: Schema `RuntimeBaseline top-level artifact` includes field `/updated_at`.
+- [ ] AC-23-101: Schema `RuntimeBaseline top-level artifact` includes field `/status`.
+- [ ] AC-23-102: Schema `RuntimeBaseline top-level artifact` includes field `/stack`.
+- [ ] AC-23-103: Schema `RuntimeBaseline top-level artifact` includes field `/stack/product_platform`.
+- [ ] AC-23-104: Schema `RuntimeBaseline top-level artifact` includes field `/stack/runtime`.
+- [ ] AC-23-105: Schema `RuntimeBaseline top-level artifact` includes field `/stack/language`.
+- [ ] AC-23-106: Schema `RuntimeBaseline top-level artifact` includes field `/stack/package_manager`.
+- [ ] AC-23-107: Schema `RuntimeBaseline top-level artifact` includes field `/stack/framework`.
+- [ ] AC-23-108: Schema `RuntimeBaseline top-level artifact` includes field `/stack/build_tool`.
+- [ ] AC-23-109: Schema `RuntimeBaseline top-level artifact` includes field `/stack/architecture`.
+- [ ] AC-23-110: Schema `RuntimeBaseline top-level artifact` includes field `/commands`.
+- [ ] AC-23-111: Schema `RuntimeBaseline top-level artifact` includes field `/commands/test`.
+- [ ] AC-23-112: Schema `RuntimeBaseline top-level artifact` includes field `/commands/test_not_applicable_reason`.
+- [ ] AC-23-113: Schema `RuntimeBaseline top-level artifact` includes field `/commands/build`.
+- [ ] AC-23-114: Schema `RuntimeBaseline top-level artifact` includes field `/commands/build_not_applicable_reason`.
+- [ ] AC-23-115: Schema `RuntimeBaseline top-level artifact` includes field `/commands/runtime_production`.
+- [ ] AC-23-116: Schema `RuntimeBaseline top-level artifact` includes field `/commands/runtime_production_not_applicable_reason`.
+- [ ] AC-23-117: Schema `RuntimeBaseline top-level artifact` includes field `/commands/runtime_development`.
+- [ ] AC-23-118: Schema `RuntimeBaseline top-level artifact` includes field `/commands/runtime_development_not_applicable_reason`.
+- [ ] AC-23-119: Schema `RuntimeBaseline top-level artifact` includes field `/configuration`.
+- [ ] AC-23-120: Schema `RuntimeBaseline top-level artifact` includes field `/configuration/environment_strategy`.
+- [ ] AC-23-121: Schema `RuntimeBaseline top-level artifact` includes field `/configuration/required_env_vars`.
+- [ ] AC-23-122: Schema `RuntimeBaseline top-level artifact` includes field `/configuration/greenfield_scaffold`.
+- [ ] AC-23-123: Schema `RuntimeBaseline top-level artifact` includes field `/dependency_modes`.
+- [ ] AC-23-124: Schema `RuntimeBaseline top-level artifact` includes field `/dependency_modes/install_mode`.
+- [ ] AC-23-125: Schema `RuntimeBaseline top-level artifact` includes field `/dependency_modes/external_services`.
+- [ ] AC-23-126: Schema `RuntimeBaseline top-level artifact` includes field `/diff_policy`.
+- [ ] AC-23-127: Schema `RuntimeBaseline top-level artifact` includes field `/diff_policy/dependency_changes_require_approval`.
+- [ ] AC-23-128: Schema `RuntimeBaseline top-level artifact` includes field `/diff_policy/include_untracked`.
+- [ ] AC-23-129: Schema `RuntimeBaseline top-level artifact` includes field `/validation`.
+- [ ] AC-23-130: Schema `RuntimeBaseline top-level artifact` includes field `/validation/command_results`.
+- [ ] AC-23-131: Schema `RuntimeBaseline top-level artifact` includes field `/validation/diagnostics`.
+- [ ] AC-23-132: Schema `RuntimeBaseline top-level artifact` includes field `/acceptance`.
+- [ ] AC-23-133: Schema `RuntimeBaseline top-level artifact` includes field `/decision_history`.
+- [ ] AC-23-134: Schema `RuntimeBaseline top-level artifact` includes field `/blocker`.
+- [ ] AC-23-135: Schema `PacketChangeBaseline embedded record` is implemented.
+- [ ] AC-23-136: Schema `PacketChangeBaseline embedded record` includes field `/mode`.
+- [ ] AC-23-137: Schema `PacketChangeBaseline embedded record` includes field `/captured_at`.
+- [ ] AC-23-138: Schema `PacketChangeBaseline embedded record` includes field `/work_id`.
+- [ ] AC-23-139: Schema `PacketChangeBaseline embedded record` includes field `/artifact_revision`.
+- [ ] AC-23-140: Schema `PacketChangeBaseline embedded record` includes field `/artifact_hash`.
+- [ ] AC-23-141: Schema `PacketChangeBaseline embedded record` includes field `/review_snapshot_hash`.
+- [ ] AC-23-142: Schema `PacketChangeBaseline embedded record` includes field `/allowed_globs`.
+- [ ] AC-23-143: Schema `PacketChangeBaseline embedded record` includes field `/ignored_paths`.
+- [ ] AC-23-144: Schema `PacketChangeBaseline embedded record` includes field `/vcs`.
+- [ ] AC-23-145: Schema `PacketChangeBaseline embedded record` includes field `/manifest`.
+- [ ] AC-23-146: Schema `VcsChangeBaseline` is implemented.
+- [ ] AC-23-147: Schema `VcsChangeBaseline` includes field `/system`.
+- [ ] AC-23-148: Schema `VcsChangeBaseline` includes field `/commit`.
+- [ ] AC-23-149: Schema `VcsChangeBaseline` includes field `/tree`.
+- [ ] AC-23-150: Schema `VcsChangeBaseline` includes field `/dirty_files`.
+- [ ] AC-23-151: Schema `VcsChangeBaseline` includes field `/untracked_files`.
+- [ ] AC-23-152: Schema `VcsChangeBaseline` includes field `/preauthorization_dirty_entries`.
+- [ ] AC-23-153: Schema `ManifestChangeBaseline` is implemented.
+- [ ] AC-23-154: Schema `ManifestChangeBaseline` includes field `/manifest_hash`.
+- [ ] AC-23-155: Schema `ManifestChangeBaseline` includes field `/files`.
+- [ ] AC-23-156: Schema `WorkPacket top-level artifact` is implemented.
+- [ ] AC-23-157: Schema `WorkPacket top-level artifact` includes field `/artifact_type`.
+- [ ] AC-23-158: Schema `WorkPacket top-level artifact` includes field `/schema_version`.
+- [ ] AC-23-159: Schema `WorkPacket top-level artifact` includes field `/id`.
+- [ ] AC-23-160: Schema `WorkPacket top-level artifact` includes field `/revision`.
+- [ ] AC-23-161: Schema `WorkPacket top-level artifact` includes field `/created_at`.
+- [ ] AC-23-162: Schema `WorkPacket top-level artifact` includes field `/updated_at`.
+- [ ] AC-23-163: Schema `WorkPacket top-level artifact` includes field `/status`.
+- [ ] AC-23-164: Schema `WorkPacket top-level artifact` includes field `/title`.
+- [ ] AC-23-165: Schema `WorkPacket top-level artifact` includes field `/classification`.
+- [ ] AC-23-166: Schema `WorkPacket top-level artifact` includes field `/parent_plan_id`.
+- [ ] AC-23-167: Schema `WorkPacket top-level artifact` includes field `/plan_slice_id`.
+- [ ] AC-23-168: Schema `WorkPacket top-level artifact` includes field `/intent`.
+- [ ] AC-23-169: Schema `WorkPacket top-level artifact` includes field `/intent/goal`.
+- [ ] AC-23-170: Schema `WorkPacket top-level artifact` includes field `/intent/desired_outcomes`.
+- [ ] AC-23-171: Schema `WorkPacket top-level artifact` includes field `/intent/in_scope`.
+- [ ] AC-23-172: Schema `WorkPacket top-level artifact` includes field `/intent/out_of_scope`.
+- [ ] AC-23-173: Schema `WorkPacket top-level artifact` includes field `/intent/users_actors`.
+- [ ] AC-23-174: Schema `WorkPacket top-level artifact` includes field `/intent/edge_cases`.
+- [ ] AC-23-175: Schema `WorkPacket top-level artifact` includes field `/intent/open_questions`.
+- [ ] AC-23-176: Schema `WorkPacket top-level artifact` includes field `/acceptance_criteria`.
+- [ ] AC-23-177: Schema `WorkPacket top-level artifact` includes field `/docs`.
+- [ ] AC-23-178: Schema `WorkPacket top-level artifact` includes field `/docs/policy`.
+- [ ] AC-23-179: Schema `WorkPacket top-level artifact` includes field `/docs/none_required_reason`.
+- [ ] AC-23-180: Schema `WorkPacket top-level artifact` includes field `/docs/not_applicable_reason`.
+- [ ] AC-23-181: Schema `WorkPacket top-level artifact` includes field `/docs/requirements`.
+- [ ] AC-23-182: Schema `WorkPacket top-level artifact` includes field `/docs/records`.
+- [ ] AC-23-183: Schema `WorkPacket top-level artifact` includes field `/scope`.
+- [ ] AC-23-184: Schema `WorkPacket top-level artifact` includes field `/scope/allowed_globs`.
+- [ ] AC-23-185: Schema `WorkPacket top-level artifact` includes field `/scope/deviations`.
+- [ ] AC-23-186: Schema `WorkPacket top-level artifact` includes field `/platform`.
+- [ ] AC-23-187: Schema `WorkPacket top-level artifact` includes field `/platform/required`.
+- [ ] AC-23-188: Schema `WorkPacket top-level artifact` includes field `/platform/choice`.
+- [ ] AC-23-189: Schema `WorkPacket top-level artifact` includes field `/platform/decision_id`.
+- [ ] AC-23-190: Schema `WorkPacket top-level artifact` includes field `/platform/not_required_reason`.
+- [ ] AC-23-191: Schema `WorkPacket top-level artifact` includes field `/architecture`.
+- [ ] AC-23-192: Schema `WorkPacket top-level artifact` includes field `/architecture/required`.
+- [ ] AC-23-193: Schema `WorkPacket top-level artifact` includes field `/architecture/required_reason`.
+- [ ] AC-23-194: Schema `WorkPacket top-level artifact` includes field `/architecture/not_required_reason`.
+- [ ] AC-23-195: Schema `WorkPacket top-level artifact` includes field `/architecture/decision_ids`.
+- [ ] AC-23-196: Schema `WorkPacket top-level artifact` includes field `/runtime_baseline_ref`.
+- [ ] AC-23-197: Schema `WorkPacket top-level artifact` includes field `/change_baseline`.
+- [ ] AC-23-198: Schema `WorkPacket top-level artifact` includes field `/lifecycle`.
+- [ ] AC-23-199: Schema `WorkPacket top-level artifact` includes field `/lifecycle/ac_approval`.
+- [ ] AC-23-200: Schema `WorkPacket top-level artifact` includes field `/lifecycle/packet_approval`.
+- [ ] AC-23-201: Schema `WorkPacket top-level artifact` includes field `/lifecycle/authorization`.
+- [ ] AC-23-202: Schema `WorkPacket top-level artifact` includes field `/lifecycle/history`.
+- [ ] AC-23-203: Schema `WorkPacket top-level artifact` includes field `/decision_history`.
+- [ ] AC-23-204: Schema `WorkPacket top-level artifact` includes field `/evidence`.
+- [ ] AC-23-205: Schema `WorkPacket top-level artifact` includes field `/claims`.
+- [ ] AC-23-206: Schema `WorkPacket top-level artifact` includes field `/backend_verifications`.
+- [ ] AC-23-207: Schema `WorkPacket top-level artifact` includes field `/review`.
+- [ ] AC-23-208: Schema `WorkPacket top-level artifact` includes field `/review/implementation_files`.
+- [ ] AC-23-209: Schema `WorkPacket top-level artifact` includes field `/review/test_files`.
+- [ ] AC-23-210: Schema `WorkPacket top-level artifact` includes field `/review/changed_files`.
+- [ ] AC-23-211: Schema `WorkPacket top-level artifact` includes field `/review/ac_verification`.
+- [ ] AC-23-212: Schema `WorkPacket top-level artifact` includes field `/review/claims`.
+- [ ] AC-23-213: Schema `WorkPacket top-level artifact` includes field `/review/complete`.
+- [ ] AC-23-214: Schema `WorkPacket top-level artifact` includes field `/diagnostics`.
+- [ ] AC-23-215: Schema `Plan top-level artifact` is implemented.
+- [ ] AC-23-216: Schema `Plan top-level artifact` includes field `/artifact_type`.
+- [ ] AC-23-217: Schema `Plan top-level artifact` includes field `/schema_version`.
+- [ ] AC-23-218: Schema `Plan top-level artifact` includes field `/id`.
+- [ ] AC-23-219: Schema `Plan top-level artifact` includes field `/title`.
+- [ ] AC-23-220: Schema `Plan top-level artifact` includes field `/revision`.
+- [ ] AC-23-221: Schema `Plan top-level artifact` includes field `/created_at`.
+- [ ] AC-23-222: Schema `Plan top-level artifact` includes field `/updated_at`.
+- [ ] AC-23-223: Schema `Plan top-level artifact` includes field `/status`.
+- [ ] AC-23-224: Schema `Plan top-level artifact` includes field `/implements`.
+- [ ] AC-23-225: Schema `Plan top-level artifact` includes field `/goal`.
+- [ ] AC-23-226: Schema `Plan top-level artifact` includes field `/source_work_id`.
+- [ ] AC-23-227: Schema `Plan top-level artifact` includes field `/product_context`.
+- [ ] AC-23-228: Schema `Plan top-level artifact` includes field `/product_context/platform_choice`.
+- [ ] AC-23-229: Schema `Plan top-level artifact` includes field `/product_context/platform_decision_id`.
+- [ ] AC-23-230: Schema `Plan top-level artifact` includes field `/product_context/architecture_decision_ids`.
+- [ ] AC-23-231: Schema `Plan top-level artifact` includes field `/product_context/source_request_summary`.
+- [ ] AC-23-232: Schema `Plan top-level artifact` includes field `/product_context/source_evidence_summary`.
+- [ ] AC-23-233: Schema `Plan top-level artifact` includes field `/plan_proposal`.
+- [ ] AC-23-234: Schema `Plan top-level artifact` includes field `/plan_proposal/title`.
+- [ ] AC-23-235: Schema `Plan top-level artifact` includes field `/plan_proposal/goal`.
+- [ ] AC-23-236: Schema `Plan top-level artifact` includes field `/plan_proposal/source_work_id`.
+- [ ] AC-23-237: Schema `Plan top-level artifact` includes field `/plan_proposal/product_context`.
+- [ ] AC-23-238: Schema `Plan top-level artifact` includes field `/plan_proposal/summary`.
+- [ ] AC-23-239: Schema `Plan top-level artifact` includes field `/plan_proposal/source_artifact_refs`.
+- [ ] AC-23-240: Schema `Plan top-level artifact` includes field `/plan_proposal/slices`.
+- [ ] AC-23-241: Schema `Plan top-level artifact` includes field `/plan_proposal/proposed_id`.
+- [ ] AC-23-242: Schema `Plan top-level artifact` includes field `/plan_proposal/desired_outcomes`.
+- [ ] AC-23-243: Schema `Plan top-level artifact` includes field `/plan_proposal/in_scope`.
+- [ ] AC-23-244: Schema `Plan top-level artifact` includes field `/plan_proposal/out_of_scope`.
+- [ ] AC-23-245: Schema `Plan top-level artifact` includes field `/plan_proposal/users_actors`.
+- [ ] AC-23-246: Schema `Plan top-level artifact` includes field `/plan_proposal/edge_cases`.
+- [ ] AC-23-247: Schema `Plan top-level artifact` includes field `/plan_proposal/open_questions`.
+- [ ] AC-23-248: Schema `Plan top-level artifact` includes field `/plan_proposal/ac_ids`.
+- [ ] AC-23-249: Schema `Plan top-level artifact` includes field `/plan_proposal/acceptance_criteria`.
+- [ ] AC-23-250: Schema `Plan top-level artifact` includes field `/plan_proposal/classification`.
+- [ ] AC-23-251: Schema `Plan top-level artifact` includes field `/plan_proposal/docs_policy`.
+- [ ] AC-23-252: Schema `Plan top-level artifact` includes field `/plan_proposal/docs_none_required_reason`.
+- [ ] AC-23-253: Schema `Plan top-level artifact` includes field `/plan_proposal/docs_not_applicable_reason`.
+- [ ] AC-23-254: Schema `Plan top-level artifact` includes field `/plan_proposal/allowed_globs`.
+- [ ] AC-23-255: Schema `Plan top-level artifact` includes field `/plan_proposal/contains_source_derived_acs`.
+- [ ] AC-23-256: Schema `Plan top-level artifact` includes field `/plan_proposal/source_evidence_summary`.
+- [ ] AC-23-257: Schema `Plan top-level artifact` includes field `/approval`.
+- [ ] AC-23-258: Schema `Plan top-level artifact` includes field `/decision_history`.
+- [ ] AC-23-259: Schema `Plan top-level artifact` includes field `/batch_review_snapshots`.
+- [ ] AC-23-260: Schema `Plan top-level artifact` includes field `/batch_proceed_records`.
+- [ ] AC-23-261: Schema `Plan top-level artifact` includes field `/child_work_ids`.
+- [ ] AC-23-262: Schema `Plan top-level artifact` includes field `/diagnostics`.
+- [ ] AC-23-263: Schema `EvidenceRecord embedded record` is implemented.
+- [ ] AC-23-264: Schema `EvidenceRecord embedded record` includes field `/id`.
+- [ ] AC-23-265: Schema `EvidenceRecord embedded record` includes field `/type`.
+- [ ] AC-23-266: Schema `EvidenceRecord embedded record` includes field `/created_at`.
+- [ ] AC-23-267: Schema `EvidenceRecord embedded record` includes field `/command`.
+- [ ] AC-23-268: Schema `EvidenceRecord embedded record` includes field `/exit_code`.
+- [ ] AC-23-269: Schema `EvidenceRecord embedded record` includes field `/status`.
+- [ ] AC-23-270: Schema `EvidenceRecord embedded record` includes field `/paths`.
+- [ ] AC-23-271: Schema `EvidenceRecord embedded record` includes field `/related_ac_ids`.
+- [ ] AC-23-272: Schema `EvidenceRecord embedded record` includes field `/related_doc_ids`.
+- [ ] AC-23-273: Schema `EvidenceRecord embedded record` includes field `/resource_categories`.
+- [ ] AC-23-274: Schema `EvidenceRecord embedded record` includes field `/command_result_ref`.
+- [ ] AC-23-275: Schema `EvidenceRecord embedded record` includes field `/evidence_role`.
+- [ ] AC-23-276: Schema `EvidenceRecord embedded record` includes field `/file_state_snapshot`.
+- [ ] AC-23-277: Schema `EvidenceRecord embedded record` includes field `/summary`.
+- [ ] AC-23-278: Schema `EvidenceRecord embedded record` includes field `/output_ref`.
+- [ ] AC-23-279: Schema `EvidenceRecord embedded record` includes field `/docs_content_tokens`.
+- [ ] AC-23-280: Schema `EvidenceRecord embedded record` includes field `/cleanup`.
+- [ ] AC-23-281: Schema `EvidenceRecord embedded record` includes field `/not_applicable`.
+- [ ] AC-23-282: Schema `EvidenceRecord embedded record` includes field `/source_interface`.
+- [ ] AC-23-283: Schema `BackendVerification embedded record` is implemented.
+- [ ] AC-23-284: Schema `BackendVerification embedded record` includes field `/id`.
+- [ ] AC-23-285: Schema `BackendVerification embedded record` includes field `/task_id`.
+- [ ] AC-23-286: Schema `BackendVerification embedded record` includes field `/verifier_schema_version`.
+- [ ] AC-23-287: Schema `BackendVerification embedded record` includes field `/task_type`.
+- [ ] AC-23-288: Schema `BackendVerification embedded record` includes field `/adapter`.
+- [ ] AC-23-289: Schema `BackendVerification embedded record` includes field `/claims`.
+- [ ] AC-23-290: Schema `BackendVerification embedded record` includes field `/evidence_refs`.
+- [ ] AC-23-291: Schema `BackendVerification embedded record` includes field `/human_approved_refs`.
+- [ ] AC-23-292: Schema `BackendVerification embedded record` includes field `/schema_status`.
+- [ ] AC-23-293: Schema `BackendVerification embedded record` includes field `/status`.
+- [ ] AC-23-294: Schema `BackendVerification embedded record` includes field `/findings`.
+- [ ] AC-23-295: Schema `BackendVerification embedded record` includes field `/verified_claim_ids`.
+- [ ] AC-23-296: Schema `BackendVerification embedded record` includes field `/unverified_claim_ids`.
+- [ ] AC-23-297: Schema `BackendVerification embedded record` includes field `/contradicted_claim_ids`.
+- [ ] AC-23-298: Schema `BackendVerification embedded record` includes field `/prohibited_human_intent_judgment_detected`.
+- [ ] AC-23-299: Schema `BackendVerification embedded record` includes field `/input_hash`.
+- [ ] AC-23-300: Schema `BackendVerification embedded record` includes field `/result_hash`.
+- [ ] AC-23-301: Schema `BackendVerification embedded record` includes field `/created_at`.
+- [ ] AC-23-302: Schema `BatchReviewSnapshot embedded record` is implemented.
+- [ ] AC-23-303: Schema `BatchReviewSnapshot embedded record` includes field `/id`.
+- [ ] AC-23-304: Schema `BatchReviewSnapshot embedded record` includes field `/plan_id`.
+- [ ] AC-23-305: Schema `BatchReviewSnapshot embedded record` includes field `/plan_revision`.
+- [ ] AC-23-306: Schema `BatchReviewSnapshot embedded record` includes field `/plan_proposal_hash`.
+- [ ] AC-23-307: Schema `BatchReviewSnapshot embedded record` includes field `/plan_proposal_snapshot_revision`.
+- [ ] AC-23-308: Schema `BatchReviewSnapshot embedded record` includes field `/source_artifact_refs`.
+- [ ] AC-23-309: Schema `BatchReviewSnapshot embedded record` includes field `/proposed_children_payload`.
+- [ ] AC-23-310: Schema `BatchReviewSnapshot embedded record` includes field `/proposed_children_payload_hash`.
+- [ ] AC-23-311: Schema `BatchReviewSnapshot embedded record` includes field `/proposed_children_payload_snapshot_revision`.
+- [ ] AC-23-312: Schema `BatchReviewSnapshot embedded record` includes field `/prompt_text`.
+- [ ] AC-23-313: Schema `BatchReviewSnapshot embedded record` includes field `/options`.
+- [ ] AC-23-314: Schema `BatchReviewSnapshot embedded record` includes field `/snapshot_hash`.
+- [ ] AC-23-315: Schema `BatchReviewSnapshot embedded record` includes field `/snapshot_revision`.
+- [ ] AC-23-316: Schema `BatchReviewSnapshot embedded record` includes field `/audit_revision`.
+- [ ] AC-23-317: Schema `BatchReviewSnapshot embedded record` includes field `/created_at`.
+- [ ] AC-23-318: Schema `BatchReviewSnapshot embedded record` includes field `/children`.
+- [ ] AC-23-319: Schema `BatchReviewSnapshot embedded record` includes field `/plan_slice_id`.
+- [ ] AC-23-320: Schema `BatchReviewSnapshot embedded record` includes field `/proposed_child_id`.
+- [ ] AC-23-321: Schema `BatchReviewSnapshot embedded record` includes field `/expected_created_work_packet_revision`.
+- [ ] AC-23-322: Schema `BatchReviewSnapshot embedded record` includes field `/proposed_work_payload`.
+- [ ] AC-23-323: Schema `BatchReviewSnapshot embedded record` includes field `/proposed_work_payload_hash`.
+- [ ] AC-23-324: Schema `BatchReviewSnapshot embedded record` includes field `/proposed_work_payload_revision`.
+- [ ] AC-23-325: Schema `BatchReviewSnapshot embedded record` includes field `/contains_source_derived_acs`.
+- [ ] AC-23-326: Schema `BatchReviewSnapshot embedded record` includes field `/ac_review_snapshot`.
+- [ ] AC-23-327: Schema `BatchReviewSnapshot embedded record` includes field `/packet_review_snapshot`.
+- [ ] AC-23-328: Schema `BatchReviewSnapshot embedded record` includes field `/authorization_review_snapshot`.
+- [ ] AC-23-329: Schema `BatchReviewSnapshot embedded record` includes field `/ac_snapshot_hash`.
+- [ ] AC-23-330: Schema `BatchReviewSnapshot embedded record` includes field `/ac_snapshot_revision`.
+- [ ] AC-23-331: Schema `BatchReviewSnapshot embedded record` includes field `/packet_snapshot_hash`.
+- [ ] AC-23-332: Schema `BatchReviewSnapshot embedded record` includes field `/packet_snapshot_revision`.
+- [ ] AC-23-333: Schema `BatchReviewSnapshot embedded record` includes field `/authorization_snapshot_hash`.
+- [ ] AC-23-334: Schema `BatchReviewSnapshot embedded record` includes field `/authorization_snapshot_revision`.
+- [ ] AC-23-335: Schema `BatchReviewSnapshot embedded record` includes field `/batch_approval_eligible`.
+- [ ] AC-23-336: Schema `BatchReviewSnapshot embedded record` includes field `/batch_authorization_eligible`.
+- [ ] AC-23-337: Schema `BatchReviewSnapshot embedded record` includes field `/ineligibility_reasons`.
+- [ ] AC-23-338: Schema `BatchReviewSnapshot embedded record` includes field `/readiness`.
+- [ ] AC-23-339: Schema `BatchReviewSnapshot embedded record` includes field `/readiness/ac_approval_ready`.
+- [ ] AC-23-340: Schema `BatchReviewSnapshot embedded record` includes field `/readiness/packet_approval_ready`.
+- [ ] AC-23-341: Schema `BatchReviewSnapshot embedded record` includes field `/readiness/batch_authorization_ready`.
+- [ ] AC-23-342: Schema `BatchReviewSnapshot embedded record` includes field `/readiness/diagnostics`.
+- [ ] AC-23-343: Schema `Supporting embedded types` is implemented.
+- [ ] AC-23-344: Schema `Supporting embedded types` includes field `/artifact_type`.
+- [ ] AC-23-345: Schema `Supporting embedded types` includes field `/schema_version`.
+- [ ] AC-23-346: Schema `Supporting embedded types` includes field `/id`.
+- [ ] AC-23-347: Schema `Supporting embedded types` includes field `/revision`.
+- [ ] AC-23-348: Schema `Supporting embedded types` includes field `/created_at`.
+- [ ] AC-23-349: Schema `Supporting embedded types` includes field `/updated_at`.
+- [ ] AC-23-350: Schema `Supporting embedded types` includes field `/kind`.
+- [ ] AC-23-351: Schema `Supporting embedded types` includes field `/label`.
+- [ ] AC-23-352: Schema `Supporting embedded types` includes field `/locator`.
+- [ ] AC-23-353: Schema `Supporting embedded types` includes field `/content_ref`.
+- [ ] AC-23-354: Schema `Supporting embedded types` includes field `/content_hash`.
+- [ ] AC-23-355: Schema `Supporting embedded types` includes field `/descriptor`.
+- [ ] AC-23-356: Schema `Supporting embedded types` includes field `/captured_at`.
+- [ ] AC-23-357: Schema `Supporting embedded types` includes field `/source_interface`.
+- [ ] AC-23-358: Schema `Supporting embedded types` includes field `/diagnostics`.
+- [ ] AC-23-359: Schema `SourceArtifactRegisterInput` is implemented.
+- [ ] AC-23-360: Schema `SourceArtifactRegisterInput` includes field `/kind`.
+- [ ] AC-23-361: Schema `SourceArtifactRegisterInput` includes field `/label`.
+- [ ] AC-23-362: Schema `SourceArtifactRegisterInput` includes field `/locator`.
+- [ ] AC-23-363: Schema `SourceArtifactRegisterInput` includes field `/content_bytes_base64`.
+- [ ] AC-23-364: Schema `SourceArtifactRegisterInput` includes field `/descriptor`.
+- [ ] AC-23-365: Schema `SourceArtifactRegisterInput` includes field `/content_hash`.
+- [ ] AC-23-366: Schema `SourceArtifactRegisterInput` includes field `/source_interface`.
+- [ ] AC-23-367: Schema `SourceArtifactUpdateInput` is implemented.
+- [ ] AC-23-368: Schema `SourceArtifactUpdateInput` includes field `/id`.
+- [ ] AC-23-369: Schema `SourceArtifactUpdateInput` includes field `/kind`.
+- [ ] AC-23-370: Schema `SourceArtifactUpdateInput` includes field `/label`.
+- [ ] AC-23-371: Schema `SourceArtifactUpdateInput` includes field `/locator`.
+- [ ] AC-23-372: Schema `SourceArtifactUpdateInput` includes field `/content_bytes_base64`.
+- [ ] AC-23-373: Schema `SourceArtifactUpdateInput` includes field `/descriptor`.
+- [ ] AC-23-374: Schema `SourceArtifactUpdateInput` includes field `/content_hash`.
+- [ ] AC-23-375: Schema `SourceArtifactUpdateInput` includes field `/source_interface`.
+- [ ] AC-23-376: Schema `SourceArtifactRef` is implemented.
+- [ ] AC-23-377: Schema `SourceArtifactRef` includes field `/artifact_type`.
+- [ ] AC-23-378: Schema `SourceArtifactRef` includes field `/id`.
+- [ ] AC-23-379: Schema `SourceArtifactRef` includes field `/revision`.
+- [ ] AC-23-380: Schema `SourceArtifactRef` includes field `/content_hash`.
+- [ ] AC-23-381: Schema `ApprovedPayloadRef` is implemented.
+- [ ] AC-23-382: Schema `ApprovedPayloadRef` includes field `/record_type`.
+- [ ] AC-23-383: Schema `ApprovedPayloadRef` includes field `/record_id`.
+- [ ] AC-23-384: Schema `ApprovedPayloadRef` includes field `/payload_field`.
+- [ ] AC-23-385: Schema `ApprovedPayloadRef` includes field `/payload_pointer`.
+- [ ] AC-23-386: Schema `ApprovedPayloadRef` includes field `/payload_hash`.
+- [ ] AC-23-387: Schema `ApprovedPayloadRef` includes field `/payload_revision`.
+- [ ] AC-23-388: Schema `BaselineReviewSnapshotPayload` is implemented.
+- [ ] AC-23-389: Schema `BaselineReviewSnapshotPayload` includes field `/stack`.
+- [ ] AC-23-390: Schema `BaselineReviewSnapshotPayload` includes field `/commands`.
+- [ ] AC-23-391: Schema `BaselineReviewSnapshotPayload` includes field `/configuration`.
+- [ ] AC-23-392: Schema `BaselineReviewSnapshotPayload` includes field `/dependency_modes`.
+- [ ] AC-23-393: Schema `BaselineReviewSnapshotPayload` includes field `/diff_policy`.
+- [ ] AC-23-394: Schema `BaselineReviewSnapshotPayload` includes field `/validation`.
+- [ ] AC-23-395: Schema `AcReviewSnapshotPayload` is implemented.
+- [ ] AC-23-396: Schema `AcReviewSnapshotPayload` includes field `/work_id`.
+- [ ] AC-23-397: Schema `AcReviewSnapshotPayload` includes field `/work_packet_revision`.
+- [ ] AC-23-398: Schema `AcReviewSnapshotPayload` includes field `/acceptance_criteria`.
+- [ ] AC-23-399: Schema `WorkPacketReviewSnapshotPayload` is implemented.
+- [ ] AC-23-400: Schema `WorkPacketReviewSnapshotPayload` includes field `/id`.
+- [ ] AC-23-401: Schema `WorkPacketReviewSnapshotPayload` includes field `/work_packet_revision`.
+- [ ] AC-23-402: Schema `WorkPacketReviewSnapshotPayload` includes field `/title`.
+- [ ] AC-23-403: Schema `WorkPacketReviewSnapshotPayload` includes field `/parent_plan_id`.
+- [ ] AC-23-404: Schema `WorkPacketReviewSnapshotPayload` includes field `/plan_slice_id`.
+- [ ] AC-23-405: Schema `WorkPacketReviewSnapshotPayload` includes field `/intent`.
+- [ ] AC-23-406: Schema `WorkPacketReviewSnapshotPayload` includes field `/acceptance_criteria`.
+- [ ] AC-23-407: Schema `WorkPacketReviewSnapshotPayload` includes field `/docs`.
+- [ ] AC-23-408: Schema `WorkPacketReviewSnapshotPayload` includes field `/docs/policy`.
+- [ ] AC-23-409: Schema `WorkPacketReviewSnapshotPayload` includes field `/docs/none_required_reason`.
+- [ ] AC-23-410: Schema `WorkPacketReviewSnapshotPayload` includes field `/docs/not_applicable_reason`.
+- [ ] AC-23-411: Schema `WorkPacketReviewSnapshotPayload` includes field `/scope`.
+- [ ] AC-23-412: Schema `WorkPacketReviewSnapshotPayload` includes field `/scope/allowed_globs`.
+- [ ] AC-23-413: Schema `WorkPacketReviewSnapshotPayload` includes field `/platform`.
+- [ ] AC-23-414: Schema `WorkPacketReviewSnapshotPayload` includes field `/architecture`.
+- [ ] AC-23-415: Schema `WorkPacketReviewSnapshotPayload` includes field `/classification`.
+- [ ] AC-23-416: Schema `WorkPacketReviewSnapshotPayload` includes field `/runtime_baseline_ref`.
+- [ ] AC-23-417: Schema `ProposedAcReviewSnapshotPayload` is implemented.
+- [ ] AC-23-418: Schema `ProposedAcReviewSnapshotPayload` includes field `/proposed_child_id`.
+- [ ] AC-23-419: Schema `ProposedAcReviewSnapshotPayload` includes field `/expected_created_work_packet_revision`.
+- [ ] AC-23-420: Schema `ProposedAcReviewSnapshotPayload` includes field `/acceptance_criteria`.
+- [ ] AC-23-421: Schema `ProposedWorkPacketReviewSnapshotPayload` is implemented.
+- [ ] AC-23-422: Schema `ProposedWorkPacketReviewSnapshotPayload` includes field `/proposed_child_id`.
+- [ ] AC-23-423: Schema `ProposedWorkPacketReviewSnapshotPayload` includes field `/expected_created_work_packet_revision`.
+- [ ] AC-23-424: Schema `ProposedWorkPacketReviewSnapshotPayload` includes field `/proposed_work_payload`.
+- [ ] AC-23-425: Schema `BatchReviewSnapshotPayload` is implemented.
+- [ ] AC-23-426: Schema `BatchReviewSnapshotPayload` includes field `/plan_id`.
+- [ ] AC-23-427: Schema `BatchReviewSnapshotPayload` includes field `/plan_revision`.
+- [ ] AC-23-428: Schema `BatchReviewSnapshotPayload` includes field `/plan_proposal_hash`.
+- [ ] AC-23-429: Schema `BatchReviewSnapshotPayload` includes field `/plan_proposal_snapshot_revision`.
+- [ ] AC-23-430: Schema `BatchReviewSnapshotPayload` includes field `/source_artifact_refs`.
+- [ ] AC-23-431: Schema `BatchReviewSnapshotPayload` includes field `/proposed_children_payload`.
+- [ ] AC-23-432: Schema `BatchReviewSnapshotPayload` includes field `/proposed_children_payload_hash`.
+- [ ] AC-23-433: Schema `BatchReviewSnapshotPayload` includes field `/proposed_children_payload_snapshot_revision`.
+- [ ] AC-23-434: Schema `BatchReviewSnapshotPayload` includes field `/prompt_text`.
+- [ ] AC-23-435: Schema `BatchReviewSnapshotPayload` includes field `/options`.
+- [ ] AC-23-436: Schema `BatchReviewSnapshotPayload` includes field `/children`.
+- [ ] AC-23-437: Schema `BatchReviewSnapshotChildPayload` is implemented.
+- [ ] AC-23-438: Schema `BatchReviewSnapshotChildPayload` includes field `/plan_slice_id`.
+- [ ] AC-23-439: Schema `BatchReviewSnapshotChildPayload` includes field `/proposed_child_id`.
+- [ ] AC-23-440: Schema `BatchReviewSnapshotChildPayload` includes field `/expected_created_work_packet_revision`.
+- [ ] AC-23-441: Schema `BatchReviewSnapshotChildPayload` includes field `/proposed_work_payload`.
+- [ ] AC-23-442: Schema `BatchReviewSnapshotChildPayload` includes field `/proposed_work_payload_hash`.
+- [ ] AC-23-443: Schema `BatchReviewSnapshotChildPayload` includes field `/proposed_work_payload_revision`.
+- [ ] AC-23-444: Schema `BatchReviewSnapshotChildPayload` includes field `/contains_source_derived_acs`.
+- [ ] AC-23-445: Schema `BatchReviewSnapshotChildPayload` includes field `/source_artifact_refs`.
+- [ ] AC-23-446: Schema `BatchReviewSnapshotChildPayload` includes field `/ac_review_payload`.
+- [ ] AC-23-447: Schema `BatchReviewSnapshotChildPayload` includes field `/ac_rendered_summary`.
+- [ ] AC-23-448: Schema `BatchReviewSnapshotChildPayload` includes field `/ac_snapshot_hash`.
+- [ ] AC-23-449: Schema `BatchReviewSnapshotChildPayload` includes field `/ac_snapshot_revision`.
+- [ ] AC-23-450: Schema `BatchReviewSnapshotChildPayload` includes field `/packet_review_payload`.
+- [ ] AC-23-451: Schema `BatchReviewSnapshotChildPayload` includes field `/packet_rendered_summary`.
+- [ ] AC-23-452: Schema `BatchReviewSnapshotChildPayload` includes field `/packet_snapshot_hash`.
+- [ ] AC-23-453: Schema `BatchReviewSnapshotChildPayload` includes field `/packet_snapshot_revision`.
+- [ ] AC-23-454: Schema `BatchReviewSnapshotChildPayload` includes field `/authorization_review_payload`.
+- [ ] AC-23-455: Schema `BatchReviewSnapshotChildPayload` includes field `/authorization_rendered_summary`.
+- [ ] AC-23-456: Schema `BatchReviewSnapshotChildPayload` includes field `/authorization_snapshot_hash`.
+- [ ] AC-23-457: Schema `BatchReviewSnapshotChildPayload` includes field `/authorization_snapshot_revision`.
+- [ ] AC-23-458: Schema `BatchReviewSnapshotChildPayload` includes field `/batch_approval_eligible`.
+- [ ] AC-23-459: Schema `BatchReviewSnapshotChildPayload` includes field `/batch_authorization_eligible`.
+- [ ] AC-23-460: Schema `BatchReviewSnapshotChildPayload` includes field `/ineligibility_reasons`.
+- [ ] AC-23-461: Schema `BatchReviewSnapshotChildPayload` includes field `/readiness`.
+- [ ] AC-23-462: Schema `BatchReviewSnapshotChildPayload` includes field `/readiness/ac_approval_ready`.
+- [ ] AC-23-463: Schema `BatchReviewSnapshotChildPayload` includes field `/readiness/packet_approval_ready`.
+- [ ] AC-23-464: Schema `BatchReviewSnapshotChildPayload` includes field `/readiness/batch_authorization_ready`.
+- [ ] AC-23-465: Schema `BatchReviewSnapshotChildPayload` includes field `/readiness/diagnostics`.
+- [ ] AC-23-466: Schema `ChangeBaselineCapturePlan` is implemented.
+- [ ] AC-23-467: Schema `ChangeBaselineCapturePlan` includes field `/mode`.
+- [ ] AC-23-468: Schema `ChangeBaselineCapturePlan` includes field `/capture_action`.
+- [ ] AC-23-469: Schema `ChangeBaselineCapturePlan` includes field `/work_id`.
+- [ ] AC-23-470: Schema `ChangeBaselineCapturePlan` includes field `/proposed_child_id`.
+- [ ] AC-23-471: Schema `ChangeBaselineCapturePlan` includes field `/allowed_globs`.
+- [ ] AC-23-472: Schema `ChangeBaselineCapturePlan` includes field `/ignored_paths`.
+- [ ] AC-23-473: Schema `ChangeBaselineCapturePlan` includes field `/vcs_required`.
+- [ ] AC-23-474: Schema `ChangeBaselineCapturePlan` includes field `/manifest_includes`.
+- [ ] AC-23-475: Schema `ChangeBaselineCapturePlan` includes field `/dirty_state_policy`.
+- [ ] AC-23-476: Schema `ExpectedFileCategoryPolicy` is implemented.
+- [ ] AC-23-477: Schema `ExpectedFileCategoryPolicy` includes field `/path_policy_revision`.
+- [ ] AC-23-478: Schema `ExpectedFileCategoryPolicy` includes field `/allowed_globs`.
+- [ ] AC-23-479: Schema `ExpectedFileCategoryPolicy` includes field `/ignored_paths`.
+- [ ] AC-23-480: Schema `ExpectedFileCategoryPolicy` includes field `/allowed_preimplementation_categories`.
+- [ ] AC-23-481: Schema `ExpectedFileCategoryPolicy` includes field `/implementation_categories`.
+- [ ] AC-23-482: Schema `ExpectedFileCategoryPolicy` includes field `/unexpected_category`.
+- [ ] AC-23-483: Schema `AuthorizationReviewSnapshotPayload` is implemented.
+- [ ] AC-23-484: Schema `AuthorizationReviewSnapshotPayload` includes field `/id`.
+- [ ] AC-23-485: Schema `AuthorizationReviewSnapshotPayload` includes field `/work_packet_revision`.
+- [ ] AC-23-486: Schema `AuthorizationReviewSnapshotPayload` includes field `/approved_packet_snapshot_hash`.
+- [ ] AC-23-487: Schema `AuthorizationReviewSnapshotPayload` includes field `/approved_packet_snapshot_revision`.
+- [ ] AC-23-488: Schema `AuthorizationReviewSnapshotPayload` includes field `/authorization_ready_diagnostics`.
+- [ ] AC-23-489: Schema `AuthorizationReviewSnapshotPayload` includes field `/allowed_globs`.
+- [ ] AC-23-490: Schema `AuthorizationReviewSnapshotPayload` includes field `/runtime_baseline_ref`.
+- [ ] AC-23-491: Schema `AuthorizationReviewSnapshotPayload` includes field `/change_baseline_capture_plan`.
+- [ ] AC-23-492: Schema `AuthorizationReviewSnapshotPayload` includes field `/expected_file_category_policy`.
+- [ ] AC-23-493: Schema `AuthorizationReviewSnapshotPayload` includes field `/implementation_boundary_summary`.
+- [ ] AC-23-494: Schema `ProposedAuthorizationReviewSnapshotPayload` is implemented.
+- [ ] AC-23-495: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/plan_slice_id`.
+- [ ] AC-23-496: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/proposed_child_id`.
+- [ ] AC-23-497: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/expected_created_work_packet_revision`.
+- [ ] AC-23-498: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/proposed_packet_snapshot_hash`.
+- [ ] AC-23-499: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/proposed_packet_snapshot_revision`.
+- [ ] AC-23-500: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/authorization_ready_diagnostics`.
+- [ ] AC-23-501: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/allowed_globs`.
+- [ ] AC-23-502: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/runtime_baseline_ref`.
+- [ ] AC-23-503: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/change_baseline_capture_plan`.
+- [ ] AC-23-504: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/expected_file_category_policy`.
+- [ ] AC-23-505: Schema `ProposedAuthorizationReviewSnapshotPayload` includes field `/implementation_boundary_summary`.
+- [ ] AC-23-506: Schema `BatchProceedSelectionPayload` is implemented.
+- [ ] AC-23-507: Schema `BatchProceedSelectionPayload` includes field `/plan_id`.
+- [ ] AC-23-508: Schema `BatchProceedSelectionPayload` includes field `/selected_option`.
+- [ ] AC-23-509: Schema `BatchProceedSelectionPayload` includes field `/batch_snapshot_hash`.
+- [ ] AC-23-510: Schema `BatchProceedSelectionPayload` includes field `/batch_snapshot_revision`.
+- [ ] AC-23-511: Schema `BatchProceedSelectionPayload` includes field `/proposed_children_payload_hash`.
+- [ ] AC-23-512: Schema `BatchProceedSelectionPayload` includes field `/children`.
+- [ ] AC-23-513: Schema `BatchProceedSelectionPayload` includes field `/plan_slice_id`.
+- [ ] AC-23-514: Schema `BatchProceedSelectionPayload` includes field `/proposed_child_id`.
+- [ ] AC-23-515: Schema `BatchProceedSelectionPayload` includes field `/selected_for_creation`.
+- [ ] AC-23-516: Schema `BatchProceedSelectionPayload` includes field `/requested_ac_batch_approval`.
+- [ ] AC-23-517: Schema `BatchProceedSelectionPayload` includes field `/requested_packet_batch_approval`.
+- [ ] AC-23-518: Schema `BatchProceedSelectionPayload` includes field `/requested_batch_authorization`.
+- [ ] AC-23-519: Schema `BatchProceedSelectionPayload` includes field `/ac_snapshot_hash`.
+- [ ] AC-23-520: Schema `BatchProceedSelectionPayload` includes field `/ac_snapshot_revision`.
+- [ ] AC-23-521: Schema `BatchProceedSelectionPayload` includes field `/packet_snapshot_hash`.
+- [ ] AC-23-522: Schema `BatchProceedSelectionPayload` includes field `/packet_snapshot_revision`.
+- [ ] AC-23-523: Schema `BatchProceedSelectionPayload` includes field `/authorization_snapshot_hash`.
+- [ ] AC-23-524: Schema `BatchProceedSelectionPayload` includes field `/authorization_snapshot_revision`.
+- [ ] AC-23-525: Schema `BatchProceedResult` is implemented.
+- [ ] AC-23-526: Schema `BatchProceedResult` includes field `/plan_id`.
+- [ ] AC-23-527: Schema `BatchProceedResult` includes field `/batch_proceed_record_id`.
+- [ ] AC-23-528: Schema `BatchProceedResult` includes field `/children`.
+- [ ] AC-23-529: Schema `BatchProceedResult` includes field `/plan_slice_id`.
+- [ ] AC-23-530: Schema `BatchProceedResult` includes field `/proposed_child_id`.
+- [ ] AC-23-531: Schema `BatchProceedResult` includes field `/created_work_packet_id`.
+- [ ] AC-23-532: Schema `BatchProceedResult` includes field `/ac_batch_approved`.
+- [ ] AC-23-533: Schema `BatchProceedResult` includes field `/packet_batch_approved`.
+- [ ] AC-23-534: Schema `BatchProceedResult` includes field `/batch_authorized`.
+- [ ] AC-23-535: Schema `BatchProceedResult` includes field `/ac_snapshot_hash`.
+- [ ] AC-23-536: Schema `BatchProceedResult` includes field `/ac_snapshot_revision`.
+- [ ] AC-23-537: Schema `BatchProceedResult` includes field `/packet_snapshot_hash`.
+- [ ] AC-23-538: Schema `BatchProceedResult` includes field `/packet_snapshot_revision`.
+- [ ] AC-23-539: Schema `BatchProceedResult` includes field `/authorization_snapshot_hash`.
+- [ ] AC-23-540: Schema `BatchProceedResult` includes field `/authorization_snapshot_revision`.
+- [ ] AC-23-541: Schema `BatchProceedResult` includes field `/packet_change_baseline_ref`.
+- [ ] AC-23-542: Schema `BatchProceedResult` includes field `/diagnostics`.
+- [ ] AC-23-543: Schema `BatchProceedRecord` is implemented.
+- [ ] AC-23-544: Schema `BatchProceedRecord` includes field `/id`.
+- [ ] AC-23-545: Schema `BatchProceedRecord` includes field `/plan_id`.
+- [ ] AC-23-546: Schema `BatchProceedRecord` includes field `/decision`.
+- [ ] AC-23-547: Schema `BatchProceedRecord` includes field `/selection`.
+- [ ] AC-23-548: Schema `BatchProceedRecord` includes field `/selection_hash`.
+- [ ] AC-23-549: Schema `BatchProceedRecord` includes field `/selection_revision`.
+- [ ] AC-23-550: Schema `BatchProceedRecord` includes field `/result`.
+- [ ] AC-23-551: Schema `BatchProceedRecord` includes field `/result_hash`.
+- [ ] AC-23-552: Schema `BatchProceedRecord` includes field `/result_revision`.
+- [ ] AC-23-553: Schema `BatchProceedRecord` includes field `/batch_snapshot_hash`.
+- [ ] AC-23-554: Schema `BatchProceedRecord` includes field `/batch_snapshot_revision`.
+- [ ] AC-23-555: Schema `BatchProceedRecord` includes field `/created_at`.
+- [ ] AC-23-556: Schema `VerifierTask` is implemented.
+- [ ] AC-23-557: Schema `VerifierTask` includes field `/task_id`.
+- [ ] AC-23-558: Schema `VerifierTask` includes field `/schema_version`.
+- [ ] AC-23-559: Schema `VerifierTask` includes field `/task_type`.
+- [ ] AC-23-560: Schema `VerifierTask` includes field `/claims`.
+- [ ] AC-23-561: Schema `VerifierTask` includes field `/evidence_refs`.
+- [ ] AC-23-562: Schema `VerifierTask` includes field `/deterministic_references`.
+- [ ] AC-23-563: Schema `VerifierTask` includes field `/human_approved_refs`.
+- [ ] AC-23-564: Schema `VerifierTask` includes field `/prohibited_judgment_rules`.
+- [ ] AC-23-565: Schema `VerifierTask` includes field `/instructions`.
+- [ ] AC-23-566: Schema `VerifierResponse` is implemented.
+- [ ] AC-23-567: Schema `VerifierResponse` includes field `/task_id`.
+- [ ] AC-23-568: Schema `VerifierResponse` includes field `/schema_version`.
+- [ ] AC-23-569: Schema `VerifierResponse` includes field `/status`.
+- [ ] AC-23-570: Schema `VerifierResponse` includes field `/findings`.
+- [ ] AC-23-571: Schema `VerifierResponse` includes field `/verified_claim_ids`.
+- [ ] AC-23-572: Schema `VerifierResponse` includes field `/unverified_claim_ids`.
+- [ ] AC-23-573: Schema `VerifierResponse` includes field `/contradicted_claim_ids`.
+- [ ] AC-23-574: Schema `VerifierResponse` includes field `/prohibited_human_intent_judgment_detected`.
+- [ ] AC-23-575: Schema `VerifierConfigUpdateInput` is implemented.
+- [ ] AC-23-576: Schema `VerifierConfigUpdateInput` includes field `/mode`.
+- [ ] AC-23-577: Schema `VerifierConfigUpdateInput` includes field `/adapter_config`.
+- [ ] AC-23-578: Schema `LocalCommandAdapterConfig` is implemented.
+- [ ] AC-23-579: Schema `LocalCommandAdapterConfig` includes field `/adapter_kind`.
+- [ ] AC-23-580: Schema `LocalCommandAdapterConfig` includes field `/command_spec`.
+- [ ] AC-23-581: Schema `LocalCommandAdapterConfig` includes field `/pi`.
+- [ ] AC-23-582: Schema `LocalCommandAdapterConfig` includes field `/health_timeout_ms`.
+- [ ] AC-23-583: Schema `PiHeadlessRpcAdapterConfig` is implemented.
+- [ ] AC-23-584: Schema `PiHeadlessRpcAdapterConfig` includes field `/provider`.
+- [ ] AC-23-585: Schema `PiHeadlessRpcAdapterConfig` includes field `/model`.
+- [ ] AC-23-586: Schema `PiHeadlessRpcAdapterConfig` includes field `/no_session`.
+- [ ] AC-23-587: Schema `PiHeadlessRpcAdapterConfig` includes field `/no_tools`.
+- [ ] AC-23-588: Schema `PiHeadlessRpcAdapterConfig` includes field `/runtime_dir`.
+- [ ] AC-23-589: Schema `PiHeadlessRpcAdapterConfig` includes field `/prompt_timeout_ms`.
+- [ ] AC-23-590: Schema `PiHeadlessRpcAdapterConfig` includes field `/busy_policy`.
+- [ ] AC-23-591: Schema `PiHeadlessRpcAdapterConfig` includes field `/output_mode`.
+- [ ] AC-23-592: Schema `PiHeadlessRpcAdapterConfig` includes field `/suppress_thinking_events`.
+- [ ] AC-23-593: Schema `HttpAdapterConfig` is implemented.
+- [ ] AC-23-594: Schema `HttpAdapterConfig` includes field `/endpoint`.
+- [ ] AC-23-595: Schema `HttpAdapterConfig` includes field `/auth_env_var`.
+- [ ] AC-23-596: Schema `HttpAdapterConfig` includes field `/timeout_ms`.
+- [ ] AC-23-597: Schema `HttpAdapterConfig` includes field `/data_sharing_policy`.
+- [ ] AC-23-598: Schema `ProviderModelAdapterConfig` is implemented.
+- [ ] AC-23-599: Schema `ProviderModelAdapterConfig` includes field `/provider`.
+- [ ] AC-23-600: Schema `ProviderModelAdapterConfig` includes field `/model`.
+- [ ] AC-23-601: Schema `ProviderModelAdapterConfig` includes field `/credential_env_var`.
+- [ ] AC-23-602: Schema `ProviderModelAdapterConfig` includes field `/timeout_ms`.
+- [ ] AC-23-603: Schema `ProviderModelAdapterConfig` includes field `/data_sharing_policy`.
+- [ ] AC-23-604: Schema `TestFixtureAdapterConfig` is implemented.
+- [ ] AC-23-605: Schema `TestFixtureAdapterConfig` includes field `/fixture_name`.
+- [ ] AC-23-606: Schema `TestFixtureAdapterConfig` includes field `/allowed_in_production`.
+- [ ] AC-23-607: Schema `WorkIntentDraftInput` is implemented.
+- [ ] AC-23-608: Schema `WorkIntentDraftInput` includes field `/title`.
+- [ ] AC-23-609: Schema `WorkIntentDraftInput` includes field `/goal`.
+- [ ] AC-23-610: Schema `WorkIntentDraftInput` includes field `/desired_outcomes`.
+- [ ] AC-23-611: Schema `WorkIntentDraftInput` includes field `/in_scope`.
+- [ ] AC-23-612: Schema `WorkIntentDraftInput` includes field `/out_of_scope`.
+- [ ] AC-23-613: Schema `WorkIntentDraftInput` includes field `/users_actors`.
+- [ ] AC-23-614: Schema `WorkIntentDraftInput` includes field `/edge_cases`.
+- [ ] AC-23-615: Schema `WorkIntentDraftInput` includes field `/open_questions`.
+- [ ] AC-23-616: Schema `WorkIntentDraftInput` includes field `/acceptance_criteria`.
+- [ ] AC-23-617: Schema `WorkIntentDraftInput` includes field `/docs_policy`.
+- [ ] AC-23-618: Schema `WorkIntentDraftInput` includes field `/docs_none_required_reason`.
+- [ ] AC-23-619: Schema `WorkIntentDraftInput` includes field `/docs_not_applicable_reason`.
+- [ ] AC-23-620: Schema `WorkIntentDraftInput` includes field `/allowed_globs`.
+- [ ] AC-23-621: Schema `WorkIntentDraftInput` includes field `/architecture`.
+- [ ] AC-23-622: Schema `ReviewSnapshot` is implemented.
+- [ ] AC-23-623: Schema `ReviewSnapshot` includes field `/id`.
+- [ ] AC-23-624: Schema `ReviewSnapshot` includes field `/category`.
+- [ ] AC-23-625: Schema `ReviewSnapshot` includes field `/producer_action_id`.
+- [ ] AC-23-626: Schema `ReviewSnapshot` includes field `/snapshot_hash`.
+- [ ] AC-23-627: Schema `ReviewSnapshot` includes field `/snapshot_revision`.
+- [ ] AC-23-628: Schema `ReviewSnapshot` includes field `/audit_revision`.
+- [ ] AC-23-629: Schema `ReviewSnapshot` includes field `/source_artifact_refs`.
+- [ ] AC-23-630: Schema `ReviewSnapshot` includes field `/payload`.
+- [ ] AC-23-631: Schema `ReviewSnapshot` includes field `/rendered_summary`.
+- [ ] AC-23-632: Schema `ReviewSnapshot` includes field `/created_at`.
+- [ ] AC-23-633: Schema `ChoicePrompt` is implemented.
+- [ ] AC-23-634: Schema `ChoicePrompt` includes field `/id`.
+- [ ] AC-23-635: Schema `ChoicePrompt` includes field `/choice_type`.
+- [ ] AC-23-636: Schema `ChoicePrompt` includes field `/prompt_text`.
+- [ ] AC-23-637: Schema `ChoicePrompt` includes field `/options`.
+- [ ] AC-23-638: Schema `ChoicePrompt` includes field `/number`.
+- [ ] AC-23-639: Schema `ChoicePrompt` includes field `/label`.
+- [ ] AC-23-640: Schema `ChoicePrompt` includes field `/kind`.
+- [ ] AC-23-641: Schema `ChoicePrompt` includes field `/payload`.
+- [ ] AC-23-642: Schema `ChoicePrompt` includes field `/architecture_option_details`.
+- [ ] AC-23-643: Schema `ChoicePrompt` includes field `/custom_confirmation_value`.
+- [ ] AC-23-644: Schema `ChoicePrompt` includes field `/status`.
+- [ ] AC-23-645: Schema `ChoicePrompt` includes field `/custom_confirmation_required`.
+- [ ] AC-23-646: Schema `ChoicePrompt` includes field `/created_at`.
+- [ ] AC-23-647: Schema `ChoiceAnswer` is implemented.
+- [ ] AC-23-648: Schema `ChoiceAnswer` includes field `/choice_id`.
+- [ ] AC-23-649: Schema `ChoiceAnswer` includes field `/selected_number`.
+- [ ] AC-23-650: Schema `ChoiceAnswer` includes field `/raw_response`.
+- [ ] AC-23-651: Schema `ChoiceAnswer` includes field `/normalized_decision`.
+- [ ] AC-23-652: Schema `ChoiceAnswer` includes field `/human_confirmed`.
+- [ ] AC-23-653: Schema `ChoiceAnswer` includes field `/created_at`.
+- [ ] AC-23-654: Schema `IntakeRequest` is implemented.
+- [ ] AC-23-655: Schema `IntakeRequest` includes field `/title`.
+- [ ] AC-23-656: Schema `IntakeRequest` includes field `/goal`.
+- [ ] AC-23-657: Schema `IntakeRequest` includes field `/acceptance_criteria`.
+- [ ] AC-23-658: Schema `IntakeRequest` includes field `/desired_outcomes`.
+- [ ] AC-23-659: Schema `IntakeRequest` includes field `/in_scope`.
+- [ ] AC-23-660: Schema `IntakeRequest` includes field `/out_of_scope`.
+- [ ] AC-23-661: Schema `IntakeRequest` includes field `/users_actors`.
+- [ ] AC-23-662: Schema `IntakeRequest` includes field `/edge_cases`.
+- [ ] AC-23-663: Schema `IntakeRequest` includes field `/open_questions`.
+- [ ] AC-23-664: Schema `IntakeRequest` includes field `/docs_policy`.
+- [ ] AC-23-665: Schema `IntakeRequest` includes field `/docs_none_required_reason`.
+- [ ] AC-23-666: Schema `IntakeRequest` includes field `/docs_not_applicable_reason`.
+- [ ] AC-23-667: Schema `IntakeRequest` includes field `/allowed_globs`.
+- [ ] AC-23-668: Schema `ProductContext` is implemented.
+- [ ] AC-23-669: Schema `ProductContext` includes field `/platform_choice`.
+- [ ] AC-23-670: Schema `ProductContext` includes field `/platform_decision_id`.
+- [ ] AC-23-671: Schema `ProductContext` includes field `/architecture_decision_ids`.
+- [ ] AC-23-672: Schema `ProductContext` includes field `/source_request_summary`.
+- [ ] AC-23-673: Schema `ProductContext` includes field `/source_evidence_summary`.
+- [ ] AC-23-674: Schema `PlanVsSingleDecisionPayload` is implemented.
+- [ ] AC-23-675: Schema `PlanVsSingleDecisionPayload` includes field `/work_id`.
+- [ ] AC-23-676: Schema `PlanVsSingleDecisionPayload` includes field `/selected_option`.
+- [ ] AC-23-677: Schema `PlanVsSingleDecisionPayload` includes field `/presented_ac_payload`.
+- [ ] AC-23-678: Schema `PlanVsSingleDecisionPayload` includes field `/presented_ac_payload_hash`.
+- [ ] AC-23-679: Schema `PlanVsSingleDecisionPayload` includes field `/presented_ac_refs`.
+- [ ] AC-23-680: Schema `PlatformChoiceDecisionPayload` is implemented.
+- [ ] AC-23-681: Schema `PlatformChoiceDecisionPayload` includes field `/work_id`.
+- [ ] AC-23-682: Schema `PlatformChoiceDecisionPayload` includes field `/choice`.
+- [ ] AC-23-683: Schema `PlatformChoiceDecisionPayload` includes field `/custom_response`.
+- [ ] AC-23-684: Schema `ArchitectureChoiceDecisionPayload` is implemented.
+- [ ] AC-23-685: Schema `ArchitectureChoiceDecisionPayload` includes field `/work_id`.
+- [ ] AC-23-686: Schema `ArchitectureChoiceDecisionPayload` includes field `/choice`.
+- [ ] AC-23-687: Schema `ArchitectureChoiceDecisionPayload` includes field `/custom_response`.
+- [ ] AC-23-688: Schema `ArchitectureChoiceDecisionPayload` includes field `/option_details`.
+- [ ] AC-23-689: Schema `ArchitectureChoiceDecisionPayload` includes field `/option_details/label`.
+- [ ] AC-23-690: Schema `ArchitectureChoiceDecisionPayload` includes field `/option_details/description`.
+- [ ] AC-23-691: Schema `ArchitectureChoiceDecisionPayload` includes field `/option_details/benefits`.
+- [ ] AC-23-692: Schema `ArchitectureChoiceDecisionPayload` includes field `/option_details/costs_tradeoffs`.
+- [ ] AC-23-693: Schema `ArchitectureChoiceDecisionPayload` includes field `/option_details/downstream_constraints`.
+- [ ] AC-23-694: Schema `PlanProposalPayload` is implemented.
+- [ ] AC-23-695: Schema `PlanProposalPayload` includes field `/title`.
+- [ ] AC-23-696: Schema `PlanProposalPayload` includes field `/goal`.
+- [ ] AC-23-697: Schema `PlanProposalPayload` includes field `/source_work_id`.
+- [ ] AC-23-698: Schema `PlanProposalPayload` includes field `/product_context`.
+- [ ] AC-23-699: Schema `PlanProposalPayload` includes field `/summary`.
+- [ ] AC-23-700: Schema `PlanProposalPayload` includes field `/source_artifact_refs`.
+- [ ] AC-23-701: Schema `PlanProposalPayload` includes field `/slices`.
+- [ ] AC-23-702: Schema `PlanProposalPayload` includes field `/proposed_id`.
+- [ ] AC-23-703: Schema `PlanProposalPayload` includes field `/desired_outcomes`.
+- [ ] AC-23-704: Schema `PlanProposalPayload` includes field `/in_scope`.
+- [ ] AC-23-705: Schema `PlanProposalPayload` includes field `/out_of_scope`.
+- [ ] AC-23-706: Schema `PlanProposalPayload` includes field `/users_actors`.
+- [ ] AC-23-707: Schema `PlanProposalPayload` includes field `/edge_cases`.
+- [ ] AC-23-708: Schema `PlanProposalPayload` includes field `/open_questions`.
+- [ ] AC-23-709: Schema `PlanProposalPayload` includes field `/ac_ids`.
+- [ ] AC-23-710: Schema `PlanProposalPayload` includes field `/acceptance_criteria`.
+- [ ] AC-23-711: Schema `PlanProposalPayload` includes field `/classification`.
+- [ ] AC-23-712: Schema `PlanProposalPayload` includes field `/docs_policy`.
+- [ ] AC-23-713: Schema `PlanProposalPayload` includes field `/docs_none_required_reason`.
+- [ ] AC-23-714: Schema `PlanProposalPayload` includes field `/docs_not_applicable_reason`.
+- [ ] AC-23-715: Schema `PlanProposalPayload` includes field `/allowed_globs`.
+- [ ] AC-23-716: Schema `PlanProposalPayload` includes field `/contains_source_derived_acs`.
+- [ ] AC-23-717: Schema `PlanProposalPayload` includes field `/source_evidence_summary`.
+- [ ] AC-23-718: Schema `ProposedWorkPacketPayload` is implemented.
+- [ ] AC-23-719: Schema `ProposedWorkPacketPayload` includes field `/id`.
+- [ ] AC-23-720: Schema `ProposedWorkPacketPayload` includes field `/title`.
+- [ ] AC-23-721: Schema `ProposedWorkPacketPayload` includes field `/parent_plan_id`.
+- [ ] AC-23-722: Schema `ProposedWorkPacketPayload` includes field `/plan_slice_id`.
+- [ ] AC-23-723: Schema `ProposedWorkPacketPayload` includes field `/classification`.
+- [ ] AC-23-724: Schema `ProposedWorkPacketPayload` includes field `/intent`.
+- [ ] AC-23-725: Schema `ProposedWorkPacketPayload` includes field `/intent/goal`.
+- [ ] AC-23-726: Schema `ProposedWorkPacketPayload` includes field `/intent/desired_outcomes`.
+- [ ] AC-23-727: Schema `ProposedWorkPacketPayload` includes field `/intent/in_scope`.
+- [ ] AC-23-728: Schema `ProposedWorkPacketPayload` includes field `/intent/out_of_scope`.
+- [ ] AC-23-729: Schema `ProposedWorkPacketPayload` includes field `/intent/users_actors`.
+- [ ] AC-23-730: Schema `ProposedWorkPacketPayload` includes field `/intent/edge_cases`.
+- [ ] AC-23-731: Schema `ProposedWorkPacketPayload` includes field `/intent/open_questions`.
+- [ ] AC-23-732: Schema `ProposedWorkPacketPayload` includes field `/acceptance_criteria`.
+- [ ] AC-23-733: Schema `ProposedWorkPacketPayload` includes field `/docs`.
+- [ ] AC-23-734: Schema `ProposedWorkPacketPayload` includes field `/docs/policy`.
+- [ ] AC-23-735: Schema `ProposedWorkPacketPayload` includes field `/docs/none_required_reason`.
+- [ ] AC-23-736: Schema `ProposedWorkPacketPayload` includes field `/docs/not_applicable_reason`.
+- [ ] AC-23-737: Schema `ProposedWorkPacketPayload` includes field `/docs/requirements`.
+- [ ] AC-23-738: Schema `ProposedWorkPacketPayload` includes field `/scope`.
+- [ ] AC-23-739: Schema `ProposedWorkPacketPayload` includes field `/scope/allowed_globs`.
+- [ ] AC-23-740: Schema `ProposedWorkPacketPayload` includes field `/scope/deviations`.
+- [ ] AC-23-741: Schema `ProposedWorkPacketPayload` includes field `/platform`.
+- [ ] AC-23-742: Schema `ProposedWorkPacketPayload` includes field `/platform/required`.
+- [ ] AC-23-743: Schema `ProposedWorkPacketPayload` includes field `/platform/choice`.
+- [ ] AC-23-744: Schema `ProposedWorkPacketPayload` includes field `/platform/decision_id`.
+- [ ] AC-23-745: Schema `ProposedWorkPacketPayload` includes field `/platform/not_required_reason`.
+- [ ] AC-23-746: Schema `ProposedWorkPacketPayload` includes field `/architecture`.
+- [ ] AC-23-747: Schema `ProposedWorkPacketPayload` includes field `/architecture/required`.
+- [ ] AC-23-748: Schema `ProposedWorkPacketPayload` includes field `/architecture/required_reason`.
+- [ ] AC-23-749: Schema `ProposedWorkPacketPayload` includes field `/architecture/not_required_reason`.
+- [ ] AC-23-750: Schema `ProposedWorkPacketPayload` includes field `/architecture/decision_ids`.
+- [ ] AC-23-751: Schema `ProposedWorkPacketPayload` includes field `/runtime_baseline_ref`.
+- [ ] AC-23-752: Schema `ProposedWorkPacketPayload` includes field `/source_evidence_summary`.
+- [ ] AC-23-753: Schema `ProposedChildrenPayload` is implemented.
+- [ ] AC-23-754: Schema `ProposedChildrenPayload` includes field `/plan_id`.
+- [ ] AC-23-755: Schema `ProposedChildrenPayload` includes field `/source_artifact_refs`.
+- [ ] AC-23-756: Schema `ProposedChildrenPayload` includes field `/children`.
+- [ ] AC-23-757: Schema `ProposedChildrenPayload` includes field `/plan_slice_id`.
+- [ ] AC-23-758: Schema `ProposedChildrenPayload` includes field `/proposed_child_id`.
+- [ ] AC-23-759: Schema `ProposedChildrenPayload` includes field `/expected_created_work_packet_revision`.
+- [ ] AC-23-760: Schema `ProposedChildrenPayload` includes field `/proposed_work_payload`.
+- [ ] AC-23-761: Schema `ProposedChildrenPayload` includes field `/title`.
+- [ ] AC-23-762: Schema `ProposedChildrenPayload` includes field `/goal`.
+- [ ] AC-23-763: Schema `ProposedChildrenPayload` includes field `/acceptance_criteria`.
+- [ ] AC-23-764: Schema `ProposedChildrenPayload` includes field `/contains_source_derived_acs`.
+- [ ] AC-23-765: Schema `ProposedChildrenPayload` includes field `/scope`.
+- [ ] AC-23-766: Schema `ProposedChildrenPayload` includes field `/classification`.
+- [ ] AC-23-767: Schema `ProposedChildrenPayload` includes field `/docs_policy`.
+- [ ] AC-23-768: Schema `ProposedChildrenPayload` includes field `/allowed_globs`.
+- [ ] AC-23-769: Schema `ProposedChildrenPayload` includes field `/source_evidence_summary`.
+- [ ] AC-23-770: Schema `ProposedChildrenPayload` includes field `/platform`.
+- [ ] AC-23-771: Schema `ProposedChildrenPayload` includes field `/architecture`.
+- [ ] AC-23-772: Schema `ProposedChildrenPayload` includes field `/readiness_diagnostics`.
+- [ ] AC-23-773: Schema `DocsContentTokens` is implemented.
+- [ ] AC-23-774: Schema `DocsContentTokens` includes field `/paths`.
+- [ ] AC-23-775: Schema `DocsContentTokens` includes field `/headings`.
+- [ ] AC-23-776: Schema `DocsContentTokens` includes field `/links`.
+- [ ] AC-23-777: Schema `DocsContentTokens` includes field `/examples`.
+- [ ] AC-23-778: Schema `Blocker` is implemented.
+- [ ] AC-23-779: Schema `Blocker` includes field `/reason`.
+- [ ] AC-23-780: Schema `Blocker` includes field `/owner`.
+- [ ] AC-23-781: Schema `Blocker` includes field `/next_action`.
+- [ ] AC-23-782: Schema `Blocker` includes field `/at`.
+- [ ] AC-23-783: Schema `CleanupEvidence` is implemented.
+- [ ] AC-23-784: Schema `CleanupEvidence` includes field `/checked_resources`.
+- [ ] AC-23-785: Schema `CleanupEvidence` includes field `/resource_categories`.
+- [ ] AC-23-786: Schema `CleanupEvidence` includes field `/before_observations`.
+- [ ] AC-23-787: Schema `CleanupEvidence` includes field `/after_observations`.
+- [ ] AC-23-788: Schema `CleanupEvidence` includes field `/side_effect_status`.
+- [ ] AC-23-789: Schema `CleanupEvidence` includes field `/related_evidence_refs`.
+- [ ] AC-23-790: Schema `CleanupEvidence` includes field `/remaining_cleanup_actions`.
+- [ ] AC-23-791: Schema `NotApplicableEvidence` is implemented.
+- [ ] AC-23-792: Schema `NotApplicableEvidence` includes field `/evidence_type`.
+- [ ] AC-23-793: Schema `NotApplicableEvidence` includes field `/resource_categories`.
+- [ ] AC-23-794: Schema `NotApplicableEvidence` includes field `/reason`.
+- [ ] AC-23-795: Schema `NotApplicableEvidence` includes field `/applies_to_ac_ids`.
+- [ ] AC-23-796: Schema `NotApplicableEvidence` includes field `/classification_policy_context`.
+- [ ] AC-23-797: Schema `CommandSpec` is implemented.
+- [ ] AC-23-798: Schema `CommandSpec` includes field `/mode`.
+- [ ] AC-23-799: Schema `CommandSpec` includes field `/argv`.
+- [ ] AC-23-800: Schema `CommandSpec` includes field `/shell_command`.
+- [ ] AC-23-801: Schema `CommandSpec` includes field `/working_directory`.
+- [ ] AC-23-802: Schema `CommandSpec` includes field `/timeout_ms`.
+- [ ] AC-23-803: Schema `CommandSpec` includes field `/env_mode`.
+- [ ] AC-23-804: Schema `CommandSpec` includes field `/env_overrides_ref`.
+- [ ] AC-23-805: Schema `CommandResult` is implemented.
+- [ ] AC-23-806: Schema `CommandResult` includes field `/id`.
+- [ ] AC-23-807: Schema `CommandResult` includes field `/storage_ref`.
+- [ ] AC-23-808: Schema `CommandResult` includes field `/command`.
+- [ ] AC-23-809: Schema `CommandResult` includes field `/command_spec`.
+- [ ] AC-23-810: Schema `CommandResult` includes field `/purpose`.
+- [ ] AC-23-811: Schema `CommandResult` includes field `/working_directory`.
+- [ ] AC-23-812: Schema `CommandResult` includes field `/timeout_ms`.
+- [ ] AC-23-813: Schema `CommandResult` includes field `/env_mode`.
+- [ ] AC-23-814: Schema `CommandResult` includes field `/related_work_id`.
+- [ ] AC-23-815: Schema `CommandResult` includes field `/related_runtime_baseline_ref`.
+- [ ] AC-23-816: Schema `CommandResult` includes field `/related_runtime_baseline_draft_revision`.
+- [ ] AC-23-817: Schema `CommandResult` includes field `/exit_code`.
+- [ ] AC-23-818: Schema `CommandResult` includes field `/started_at`.
+- [ ] AC-23-819: Schema `CommandResult` includes field `/finished_at`.
+- [ ] AC-23-820: Schema `CommandResult` includes field `/duration_ms`.
+- [ ] AC-23-821: Schema `CommandResult` includes field `/status`.
+- [ ] AC-23-822: Schema `CommandResult` includes field `/skip_reason`.
+- [ ] AC-23-823: Schema `CommandResult` includes field `/skip_precondition`.
+- [ ] AC-23-824: Schema `CommandResult` includes field `/error_message`.
+- [ ] AC-23-825: Schema `CommandResult` includes field `/output_ref`.
+- [ ] AC-23-826: Schema `CommandResult` includes field `/output_excerpt`.
+- [ ] AC-23-827: Schema `CommandResult` includes field `/resource_categories`.
+- [ ] AC-23-828: Schema `CommandResult` includes field `/cleanup_observations`.
+- [ ] AC-23-829: Schema `CommandResult` includes field `/source_interface`.
+- [ ] AC-23-830: Schema `DocsRequirement` is implemented.
+- [ ] AC-23-831: Schema `DocsRequirement` includes field `/id`.
+- [ ] AC-23-832: Schema `DocsRequirement` includes field `/path`.
+- [ ] AC-23-833: Schema `DocsRequirement` includes field `/related_ac_ids`.
+- [ ] AC-23-834: Schema `DocsRequirement` includes field `/required_before`.
+- [ ] AC-23-835: Schema `DocsRequirement` includes field `/status`.
+- [ ] AC-23-836: Schema `LifecycleEvent` is implemented.
+- [ ] AC-23-837: Schema `LifecycleEvent` includes field `/at`.
+- [ ] AC-23-838: Schema `LifecycleEvent` includes field `/from_status`.
+- [ ] AC-23-839: Schema `LifecycleEvent` includes field `/to_status`.
+- [ ] AC-23-840: Schema `LifecycleEvent` includes field `/reason`.
+- [ ] AC-23-841: Schema `LifecycleEvent` includes field `/decision_id`.
+- [ ] AC-23-842: Schema `LifecycleEvent` includes field `/source_interface`.
+- [ ] AC-23-843: Schema `Claim` is implemented.
+- [ ] AC-23-844: Schema `Claim` includes field `/id`.
+- [ ] AC-23-845: Schema `Claim` includes field `/text`.
+- [ ] AC-23-846: Schema `Claim` includes field `/claim_type`.
+- [ ] AC-23-847: Schema `Claim` includes field `/related_ac_ids`.
+- [ ] AC-23-848: Schema `Claim` includes field `/related_doc_ids`.
+- [ ] AC-23-849: Schema `Claim` includes field `/evidence_refs`.
+- [ ] AC-23-850: Schema `Claim` includes field `/resource_categories`.
+- [ ] AC-23-851: Schema `Claim` includes field `/presentation`.
+- [ ] AC-23-852: Schema `VerifierFinding` is implemented.
+- [ ] AC-23-853: Schema `VerifierFinding` includes field `/id`.
+- [ ] AC-23-854: Schema `VerifierFinding` includes field `/finding_kind`.
+- [ ] AC-23-855: Schema `VerifierFinding` includes field `/target_type`.
+- [ ] AC-23-856: Schema `VerifierFinding` includes field `/target_id`.
+- [ ] AC-23-857: Schema `VerifierFinding` includes field `/severity`.
+- [ ] AC-23-858: Schema `VerifierFinding` includes field `/message`.
+- [ ] AC-23-859: Schema `VerifierFinding` includes field `/prohibited_human_intent_judgment`.
+- [ ] AC-23-860: Schema `AcceptanceCriterion` is implemented.
+- [ ] AC-23-861: Schema `AcceptanceCriterion` includes field `/id`.
+- [ ] AC-23-862: Schema `AcceptanceCriterion` includes field `/text`.
+- [ ] AC-23-863: Schema `AcceptanceCriterion` includes field `/source`.
+- [ ] AC-23-864: Schema `AcceptanceCriterion` includes field `/source_evidence`.
+- [ ] AC-23-865: Schema `SourceEvidence` is implemented.
+- [ ] AC-23-866: Schema `SourceEvidence` includes field `/kind`.
+- [ ] AC-23-867: Schema `SourceEvidence` includes field `/reference`.
+- [ ] AC-23-868: Schema `SourceEvidence` includes field `/description`.
+- [ ] AC-23-869: Schema `SourceEvidence` includes field `/source_artifact_refs`.
+- [ ] AC-23-870: Schema `SourceEvidence` includes field `/evidence_hash`.
+- [ ] AC-23-871: Schema `RuntimeBaselineRef` is implemented.
+- [ ] AC-23-872: Schema `RuntimeBaselineRef` includes field `/artifact_type`.
+- [ ] AC-23-873: Schema `RuntimeBaselineRef` includes field `/id`.
+- [ ] AC-23-874: Schema `RuntimeBaselineRef` includes field `/revision`.
+- [ ] AC-23-875: Schema `RuntimeBaselineRef` includes field `/accepted_at`.
+- [ ] AC-23-876: Schema `RuntimeBaselineRef` includes field `/acceptance_decision_id`.
+- [ ] AC-23-877: Schema `RuntimeBaselineRef` includes field `/acceptance_snapshot_hash`.
+- [ ] AC-23-878: Schema `RuntimeBaselineRef` includes field `/acceptance_snapshot_revision`.
+- [ ] AC-23-879: Schema `FileStateSnapshot` is implemented.
+- [ ] AC-23-880: Schema `FileStateSnapshot` includes field `/captured_at`.
+- [ ] AC-23-881: Schema `FileStateSnapshot` includes field `/mode`.
+- [ ] AC-23-882: Schema `FileStateSnapshot` includes field `/vcs_commit`.
+- [ ] AC-23-883: Schema `FileStateSnapshot` includes field `/manifest_hash`.
+- [ ] AC-23-884: Schema `FileStateSnapshot` includes field `/changed_files_since_packet_baseline`.
+- [ ] AC-23-885: Schema `PreauthorizationDirtyEntry` is implemented.
+- [ ] AC-23-886: Schema `PreauthorizationDirtyEntry` includes field `/path`.
+- [ ] AC-23-887: Schema `PreauthorizationDirtyEntry` includes field `/status`.
+- [ ] AC-23-888: Schema `PreauthorizationDirtyEntry` includes field `/size`.
+- [ ] AC-23-889: Schema `PreauthorizationDirtyEntry` includes field `/content_hash`.
+- [ ] AC-23-890: Schema `CleanupCommandObservations` is implemented.
+- [ ] AC-23-891: Schema `CleanupCommandObservations` includes field `/resource_categories`.
+- [ ] AC-23-892: Schema `CleanupCommandObservations` includes field `/before_observations`.
+- [ ] AC-23-893: Schema `CleanupCommandObservations` includes field `/after_observations`.
+- [ ] AC-23-894: Schema `CleanupCommandObservations` includes field `/observer_diagnostics`.
+- [ ] AC-23-895: Schema `ChangedFile` is implemented.
+- [ ] AC-23-896: Schema `ChangedFile` includes field `/path`.
+- [ ] AC-23-897: Schema `ChangedFile` includes field `/category`.
+- [ ] AC-23-898: Schema `ChangedFile` includes field `/status`.
+- [ ] AC-23-899: Schema `ChangedFile` includes field `/allowed_by_globs`.
+- [ ] AC-23-900: Implementations may add fields only if they do not weaken required behavior.
+- [ ] AC-23-901: SourceArtifact top-level or standalone record:
+- [ ] AC-23-902: Updating source material creates a new revision with a new `content_hash`
+- [ ] AC-23-903: For non-`source_artifact` refs, `content_hash` must be absent, not null.
+- [ ] AC-23-904: SourceArtifactRef arrays used in hashes or snapshot binding are canonical sets.
+- [ ] AC-23-905: Duplicate refs are removed by exact tuple identity `(artifact_type, id, revision)`, and duplicates with conflicting `content_hash` are invalid.
+- [ ] AC-23-906: Locale collation must not be used.
+- [ ] AC-23-907: Spec Guard must not restrict `artifact_type` by file type, extension, media type, or source kind.
+- [ ] AC-23-908: Batch child AC review snapshots use `ProposedAcReviewSnapshotPayload` because no WorkPacket revision exists yet.
+- [ ] AC-23-909: After child creation, the created WorkPacket acceptance criteria must exactly match this payload before batch AC approval can be recorded.
+- [ ] AC-23-910: Batch child packet review snapshots use `ProposedWorkPacketReviewSnapshotPayload` because no WorkPacket revision exists yet.
+- [ ] AC-23-911: After child creation, the expected created revision must be 1 before batch child approval or authorization can be recorded.
+- [ ] AC-23-912: It excludes BatchReviewSnapshot `id`, `snapshot_hash`, `snapshot_revision`, `audit_revision`, `created_at`, and nested `ReviewSnapshot` wrapper records.
+- [ ] AC-23-913: The batch hash root includes the child review payloads, rendered summaries, hashes, revisions, eligibility flags, source refs, proposed work payload, and readiness data through `BatchReviewSnapshotChildPayload`.
+- [ ] AC-23-914: `change_baseline_capture_plan` and `expected_file_category_policy` are constructed by the deterministic kernel from Config.path_policy, packet allowed globs, selected baseline mode, and current WorkPacket/proposed child identity.
+- [ ] AC-23-915: ChoicePromptOption is the object type used inside `ChoicePrompt.options`.
+- [ ] AC-23-916: When a Plan slice docs policy is `not_applicable`, ProposedWorkPacketPayload.docs.not_applicable_reason must equal the Plan slice `docs_not_applicable_reason`.
+- [ ] AC-23-917: It intentionally excludes `artifact_type`, `schema_version`, `revision`, `created_at`, `updated_at`, `status`, lifecycle records, decision history, evidence, backend verification records, review records, change baseline, diagnostics, command results, and other generated/audit/runtime fields.
+- [ ] AC-23-918: When a child WorkPacket is created, Spec Guard compares the corresponding approval-relevant paths in the created WorkPacket against this payload.
+- [ ] AC-23-919: Source-derived AC evidence is not compared by free-form summary prose
+- [ ] AC-23-920: it is compared through each AC's structured SourceEvidence records, their source artifact refs, and their source evidence hashes.
+- [ ] AC-23-921: governed source-derived child dependencies must be represented on source-derived AC SourceEvidence records.
+- [ ] AC-23-922: must not conflict with `proposed_work_payload`.
+- [ ] AC-23-923: `ProposedChildrenPayload` hashes include `plan_id`, top-level `source_artifact_refs`, each child's ids, expected revision, canonical `proposed_work_payload`, child source refs, and readiness diagnostics
+- [ ] AC-23-924: optional shorthand mirror fields are excluded from the hash and never affect approval binding.
+- [ ] AC-23-925: When BatchReviewSnapshotPayload embeds `proposed_children_payload`, snapshot hashing uses this same shorthand-excluded canonical projection, while the stored audit record may retain shorthand mirrors for readability.
+- [ ] AC-23-926: Docs actions extract `paths` from supplied docs paths, `headings` from markdown-style heading lines beginning with one or more `#` characters, `links` from markdown link targets and plain URLs, and `examples` from fenced code blocks.
+- [ ] AC-23-927: Other formats may populate only paths unless a deterministic parser is configured.
+- [ ] AC-23-928: These tokens are the only docs heading/link/example tokens used by retained-doc-test detection.
+- [ ] AC-23-929: `shell` mode executes through the configured project shell recorded in config
+- [ ] AC-23-930: shell quoting is interpreted only by that configured shell.
+- [ ] AC-23-931: Working directory must be project-relative or an approved absolute project root.
+- [ ] AC-23-932: Placeholder/version-only/self-check command rejection is deterministic.
+- [ ] AC-23-933: a single executable with only version/help flags such as `--version`, `-v`, `-V`, `version`, `--help`, or `help`
+- [ ] AC-23-934: shell commands consisting only of those forms or `exit <code>`
+- [ ] AC-23-935: or executable basename `spec-guard`, `pi`, or the current Spec Guard binary with arguments that only inspect Spec Guard state.
+- [ ] AC-23-936: These commands may still be recorded as CommandResults with purpose `other`, but they cannot satisfy baseline, evidence, or review gates.
+- [ ] AC-23-937: CommandResult records are durable embedded records or standalone records referenced by `storage_ref`.
+- [ ] AC-23-938: They must be retrievable by `command_result_ref` from EvidenceRecord.
+- [ ] AC-23-939: AcceptanceCriterion ids must be unique within a WorkPacket `acceptance_criteria` array and within each Plan slice `acceptance_criteria` array.
+- [ ] AC-23-940: Plan slices must include full AcceptanceCriterion payloads for every AC.
+- [ ] AC-23-941: `ac_ids` are derived traceability mirrors
+- [ ] AC-23-942: must exactly match the ids in `acceptance_criteria`.
+- [ ] AC-23-943: Source-derived ACs must include SourceEvidence with non-empty canonical `source_artifact_refs` and `evidence_hash`.
+- [ ] AC-23-944: A SourceEvidence record depends on exactly the artifacts listed in `source_artifact_refs`.
+- [ ] AC-23-945: Deterministic dependency validation uses these refs and `evidence_hash`
+- [ ] AC-23-946: it must not infer dependencies from free-form `description` text.
+- [ ] AC-23-947: Spec Guard must not restrict `kind`, `reference`, or referenced material by a finite list of file types, extensions, media types, or artifact kinds.
